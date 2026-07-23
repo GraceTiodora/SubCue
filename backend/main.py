@@ -1,7 +1,7 @@
 import os
 import json
 import re
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List
@@ -10,6 +10,24 @@ from openai import OpenAI
 
 from database import engine, Base, get_db
 import models
+
+import models
+import sqlite3
+
+# Auto-migrate SQLite to add user_id if missing (for Production/Render)
+try:
+    conn = sqlite3.connect('./subwise.db')
+    cursor = conn.cursor()
+    # Check if user_id exists
+    cursor.execute("PRAGMA table_info(subscriptions)")
+    columns = [info[1] for info in cursor.fetchall()]
+    if "user_id" not in columns:
+        print("DEBUG: Migrating database to include user_id column...")
+        cursor.execute("ALTER TABLE subscriptions ADD COLUMN user_id VARCHAR DEFAULT 'default'")
+        conn.commit()
+    conn.close()
+except Exception as e:
+    print("Database migration error:", e)
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -50,30 +68,58 @@ def read_root():
     return {"message": "Welcome to SubCue AI API"}
 
 @app.post("/subscriptions/", response_model=models.Subscription)
-def create_subscription(sub: models.SubscriptionCreate, db: Session = Depends(get_db)):
-    db_sub = models.SubscriptionDB(**sub.dict())
+def create_subscription(
+    sub: models.SubscriptionCreate, 
+    db: Session = Depends(get_db),
+    x_user_id: str = Header("default")
+):
+    db_sub = models.SubscriptionDB(**sub.dict(), user_id=x_user_id)
     db.add(db_sub)
     db.commit()
     db.refresh(db_sub)
     return db_sub
 
 @app.get("/subscriptions/", response_model=List[models.Subscription])
-def read_subscriptions(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    subs = db.query(models.SubscriptionDB).offset(skip).limit(limit).all()
+def read_subscriptions(
+    skip: int = 0, 
+    limit: int = 100, 
+    db: Session = Depends(get_db),
+    x_user_id: str = Header("default")
+):
+    subs = db.query(models.SubscriptionDB).filter(models.SubscriptionDB.user_id == x_user_id).offset(skip).limit(limit).all()
     return subs
 
 @app.delete("/subscriptions/{sub_id}")
-def delete_subscription(sub_id: int, db: Session = Depends(get_db)):
-    db_sub = db.query(models.SubscriptionDB).filter(models.SubscriptionDB.id == sub_id).first()
+def delete_subscription(
+    sub_id: int, 
+    db: Session = Depends(get_db),
+    x_user_id: str = Header("default")
+):
+    db_sub = db.query(models.SubscriptionDB).filter(
+        models.SubscriptionDB.id == sub_id,
+        models.SubscriptionDB.user_id == x_user_id
+    ).first()
     if not db_sub:
         raise HTTPException(status_code=404, detail="Subscription not found")
     db.delete(db_sub)
     db.commit()
     return {"message": "Subscription deleted successfully"}
 
+@app.delete("/api/reset")
+def reset_database(
+    db: Session = Depends(get_db),
+    x_user_id: str = Header("default")
+):
+    db.query(models.SubscriptionDB).filter(models.SubscriptionDB.user_id == x_user_id).delete()
+    db.commit()
+    return {"message": "Database resetted successfully"}
+
 @app.get("/api/health-score")
-def get_health_score(db: Session = Depends(get_db)):
-    subs = db.query(models.SubscriptionDB).all()
+def get_health_score(
+    db: Session = Depends(get_db),
+    x_user_id: str = Header("default")
+):
+    subs = db.query(models.SubscriptionDB).filter(models.SubscriptionDB.user_id == x_user_id).all()
     
     if not subs:
         return {
@@ -81,29 +127,34 @@ def get_health_score(db: Session = Depends(get_db)):
             "status": "No Data",
             "monthly_spending": 0,
             "potential_saving": 0,
-            "recommendations": ["Add your subscriptions to get an AI health score."]
+            "recommendations": ["Tambahkan langganan Anda untuk mendapatkan analisis pengeluaran AI."]
         }
 
     total_monthly = sum(s.cost for s in subs if s.billing_cycle == 'monthly') + sum(s.cost/12 for s in subs if s.billing_cycle == 'yearly')
     
-    # Format data for AI
+    # Deterministic Score Calculation
+    weighted_score = 0
+    if total_monthly > 0:
+        for s in subs:
+            monthly_cost = s.cost if s.billing_cycle == 'monthly' else s.cost / 12
+            score_factor = 100 if s.usage_level == 'high' else (70 if s.usage_level == 'medium' else 30)
+            weighted_score += (monthly_cost / total_monthly) * score_factor
+    calculated_score = int(weighted_score) if total_monthly > 0 else 100
+
     subs_data = [{"name": s.name, "cost": s.cost, "cycle": s.billing_cycle, "usage": s.usage_level} for s in subs]
     
     prompt = f"""
-    You are SubCue AI, an expert financial advisor for digital subscriptions.
-    Analyze the following user subscriptions:
+    Anda adalah SubCue AI, konsultan keuangan cerdas.
+    Analisis daftar langganan pengguna berikut:
     {json.dumps(subs_data)}
     
-    Total monthly spending is roughly {total_monthly}.
+    Total pengeluaran bulanan pengguna: Rp {total_monthly}.
+    Berdasarkan perhitungan matematis, skor efisiensi pengguna ini adalah {calculated_score}/100.
     
-    Provide a JSON response with the following keys exactly:
-    - "score": an integer from 0 to 100 indicating subscription health (100 is best). Punish low usage subscriptions.
-    - "status": a short string like "Sehat", "Perlu Review", or "Kritis" (MUST BE IN INDONESIAN).
-    - "potential_saving": an estimated integer value of how much they could save monthly by optimizing or cancelling low-usage/overlapping subs.
-    - "recommendations": a list of 3-4 specific string recommendations (MUST BE IN INDONESIAN).
-
-    PENTING: Seluruh teks rekomendasi dan status WAJIB ditulis murni dalam BAHASA INDONESIA.
-    Return ONLY valid JSON. No markdown formatting blocks around the JSON.
+    Berikan respons JSON dengan keys berikut (tanpa blok markdown):
+    - "status": string singkat seperti "Sangat Sehat", "Cukup Sehat", "Perlu Review", atau "Kritis".
+    - "potential_saving": perkiraan angka (integer, cth: 150000) berapa banyak uang yang bisa dihemat jika langganan yang jarang dipakai dibatalkan. Jika tidak ada, isi 0.
+    - "recommendations": array berisi 3-4 kalimat rekomendasi spesifik dalam bahasa Indonesia untuk membatalkan, mempertahankan, atau menyesuaikan langganan tertentu.
     """
     
     try:
@@ -121,23 +172,28 @@ def get_health_score(db: Session = Depends(get_db)):
             result_text = json_match.group(0)
             
         data = json.loads(result_text)
+        data["score"] = calculated_score
         data["monthly_spending"] = total_monthly
         return data
     except Exception as e:
         # Fallback if AI fails
         print("AI Error:", str(e))
         return {
-            "score": 50,
+            "score": calculated_score,
             "status": "AI Sibuk/Limit",
             "monthly_spending": total_monthly,
             "potential_saving": 0,
-            "recommendations": ["Server AI (Groq/OpenRouter) sedang membatasi permintaan (*Rate Limit*) atau memproduksi output yang salah. Silakan coba beberapa saat lagi."]
+            "recommendations": ["Server AI (Groq) sedang sibuk. Namun, skor Anda berhasil dihitung di lokal secara akurat."]
         }
 
 @app.post("/api/chat")
-def chat_with_ai(query: dict, db: Session = Depends(get_db)):
+def chat_with_ai(
+    query: dict, 
+    db: Session = Depends(get_db),
+    x_user_id: str = Header("default")
+):
     user_message = query.get("message")
-    subs = db.query(models.SubscriptionDB).all()
+    subs = db.query(models.SubscriptionDB).filter(models.SubscriptionDB.user_id == x_user_id).all()
     subs_data = [{"name": s.name, "cost": s.cost, "usage": s.usage_level} for s in subs]
     
     system_prompt = f"""Anda adalah SubCue AI, asisten keuangan pintar. 

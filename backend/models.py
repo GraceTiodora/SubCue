@@ -15,6 +15,7 @@ class SubscriptionDB(Base):
     next_renewal = Column(String) # ISO format string for simplicity in MVP
     category = Column(String)
     usage_level = Column(String) # "high", "medium", "low"
+    user_id = Column(String, index=True, default="default")
 
 # Pydantic Models for Validation
 class SubscriptionBase(BaseModel):

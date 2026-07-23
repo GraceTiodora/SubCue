@@ -40,7 +40,10 @@ export default function SubscriptionList({ readonly = false }: Props) {
 
   const fetchSubs = () => {
     setLoading(true);
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/subscriptions/`)
+    const userId = localStorage.getItem("user_id") || "default";
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/subscriptions/`, {
+      headers: { "x-user-id": userId }
+    })
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -74,9 +77,13 @@ export default function SubscriptionList({ readonly = false }: Props) {
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
+    const userId = localStorage.getItem("user_id") || "default";
     fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/subscriptions/`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "x-user-id": userId
+      },
       body: JSON.stringify(formData)
     })
     .then(res => res.json())
@@ -100,7 +107,11 @@ export default function SubscriptionList({ readonly = false }: Props) {
   };
 
   const handleDelete = (id: number) => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/subscriptions/${id}`, { method: "DELETE" })
+    const userId = localStorage.getItem("user_id") || "default";
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/subscriptions/${id}`, { 
+      method: "DELETE",
+      headers: { "x-user-id": userId }
+    })
       .then(() => {
         fetchSubs(); // refresh list
         // Dispatch custom event to notify Dashboard to refresh health score

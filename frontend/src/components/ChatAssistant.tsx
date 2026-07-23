@@ -7,7 +7,15 @@ export default function ChatAssistant() {
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState<{role: 'user'|'ai', content: string}[]>([]);
   const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState("Pengguna");
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const storedName = localStorage.getItem("username");
+    if (storedName) {
+      setUsername(storedName);
+    }
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -27,9 +35,13 @@ export default function ChatAssistant() {
     setLoading(true);
 
     try {
+      const userId = localStorage.getItem("user_id") || "default";
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/api/chat`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-user-id": userId
+        },
         body: JSON.stringify({ message: textToSend })
       });
       const data = await res.json();
@@ -61,7 +73,7 @@ export default function ChatAssistant() {
         {history.length === 0 ? (
           <>
             <div className="mb-6">
-              <h2 className="text-xl font-bold mb-2">Hai Grace! 👋</h2>
+              <h2 className="text-xl font-bold mb-2">Hai {username}! 👋</h2>
               <p className="text-muted-foreground text-sm leading-relaxed">
                 Ada yang bisa saya bantu terkait pengaturan pengeluaran hari ini?
               </p>

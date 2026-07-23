@@ -1,8 +1,39 @@
 "use client";
 
 import { User, Wallet, ShieldAlert, Info, Trash2, Edit2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
+  const [username, setUsername] = useState("Pengguna");
+  const [isResetting, setIsResetting] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const storedName = localStorage.getItem("username");
+    if (storedName) setUsername(storedName);
+  }, []);
+
+  const handleResetData = async () => {
+    if (!confirm("Peringatan: Seluruh data langganan di aplikasi akan dihapus secara permanen. Lanjutkan?")) return;
+    
+    setIsResetting(true);
+    try {
+      const userId = localStorage.getItem("user_id") || "default";
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/api/reset`, { 
+        method: "DELETE",
+        headers: { "x-user-id": userId }
+      });
+      localStorage.removeItem("username");
+      localStorage.removeItem("user_id");
+      router.push("/login");
+    } catch (e) {
+      console.error(e);
+      alert("Gagal mereset data.");
+      setIsResetting(false);
+    }
+  };
+
   return (
     <div className="p-8 pb-20 max-w-4xl">
       <header className="mb-10">
@@ -33,7 +64,7 @@ export default function SettingsPage() {
               <label className="block text-sm font-medium text-muted-foreground mb-2">Nama Tampilan</label>
               <input 
                 type="text" 
-                value="Grace" 
+                value={username} 
                 disabled 
                 className="w-full bg-background border border-border/50 rounded-lg px-4 py-3 text-sm text-foreground opacity-90 cursor-not-allowed focus:outline-none"
               />
@@ -93,8 +124,12 @@ export default function SettingsPage() {
               <p className="text-sm text-muted-foreground">Tindakan ini tidak dapat dibatalkan.</p>
             </div>
           </div>
-          <button className="flex items-center gap-2 px-5 py-2.5 border border-danger/30 rounded-lg text-sm font-medium text-danger hover:bg-danger/10 transition-colors">
-            <Trash2 className="w-4 h-4" /> Hapus Semua Data
+          <button 
+            onClick={handleResetData}
+            disabled={isResetting}
+            className="flex items-center gap-2 px-5 py-2.5 border border-danger/30 rounded-lg text-sm font-medium text-danger hover:bg-danger/10 transition-colors disabled:opacity-50"
+          >
+            <Trash2 className="w-4 h-4" /> {isResetting ? "Menghapus..." : "Hapus Semua Data & Logout"}
           </button>
         </div>
       </div>

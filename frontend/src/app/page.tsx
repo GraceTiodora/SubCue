@@ -17,10 +17,16 @@ export default function Dashboard() {
   const [healthData, setHealthData] = useState<SubData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showNotif, setShowNotif] = useState(false);
+  const [username, setUsername] = useState("Pengguna");
 
   const fetchHealthData = () => {
     setLoading(true);
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/api/health-score`)
+    const userId = localStorage.getItem("user_id") || "default";
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/api/health-score`, {
+      headers: {
+        "x-user-id": userId
+      }
+    })
       .then(res => res.json())
       .then(data => {
         setHealthData(data);
@@ -42,6 +48,9 @@ export default function Dashboard() {
   useEffect(() => {
     fetchHealthData();
 
+    const storedName = localStorage.getItem("username");
+    if (storedName) setUsername(storedName);
+
     // Listen to updates from SubscriptionList
     window.addEventListener('subscription-updated', fetchHealthData);
     return () => window.removeEventListener('subscription-updated', fetchHealthData);
@@ -54,7 +63,7 @@ export default function Dashboard() {
         <header className="flex justify-between items-start mb-8">
           <div>
             <p className="text-muted-foreground text-sm mb-1 flex items-center gap-1">
-              Selamat datang kembali, Grace! <span className="text-lg">👋</span>
+              Selamat datang kembali, {username}! <span className="text-lg">👋</span>
             </p>
             <h1 className="text-3xl font-bold tracking-tight mb-2">Dashboard Kecerdasan Langganan</h1>
             <p className="text-muted-foreground">Kelola, analisis, dan optimalkan seluruh langganan Anda di satu tempat.</p>
@@ -92,7 +101,7 @@ export default function Dashboard() {
             )}
 
             <div className="w-10 h-10 rounded-full bg-border flex items-center justify-center font-bold text-sm cursor-pointer">
-              G
+              {username.charAt(0).toUpperCase()}
             </div>
           </div>
         </header>
@@ -107,22 +116,42 @@ export default function Dashboard() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             {/* Health Score Card */}
-            <div className="glass-panel p-6 flex flex-col">
-              <h2 className="text-lg font-medium mb-6 flex items-center gap-2">
+            <div className="glass-panel p-6 flex flex-col relative overflow-hidden">
+              <div className="flex items-center gap-2 mb-2">
                 <Activity className="w-5 h-5 text-primary" />
-                Skor Efisiensi
-              </h2>
+                <h2 className="text-lg font-medium">Skor Efisiensi</h2>
+              </div>
+              <p className="text-xs text-muted-foreground mb-6">Skor 0-100 mengukur seberapa optimal Anda memanfaatkan langganan yang dibayar.</p>
               
-              <div className="flex items-end gap-6 mb-8">
-                <span className="text-7xl font-bold tracking-tight">
-                  {healthData?.score || 0}
-                </span>
-                <div className="mb-2">
-                  <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold mb-2 ${(healthData?.score || 0) > 70 ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}`}>
-                    {healthData?.status || "Unknown"}
+              <div className="flex flex-col md:flex-row items-center gap-8 mb-8 mt-2 justify-center">
+                
+                {/* Circular Gauge SVG */}
+                <div className="relative w-36 h-36 flex items-center justify-center">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    {/* Background circle */}
+                    <circle cx="50" cy="50" r="45" fill="none" className="stroke-border" strokeWidth="10" />
+                    {/* Foreground circle */}
+                    <circle 
+                      cx="50" cy="50" r="45" fill="none" 
+                      className={`transition-all duration-1000 ease-out ${(healthData?.score || 0) > 70 ? 'stroke-success' : (healthData?.score || 0) > 40 ? 'stroke-warning' : 'stroke-danger'}`} 
+                      strokeWidth="10" strokeDasharray="283" 
+                      strokeDashoffset={283 - (283 * (healthData?.score || 0)) / 100}
+                      strokeLinecap="round" 
+                    />
+                  </svg>
+                  <div className="absolute flex flex-col items-center justify-center">
+                    <span className="text-4xl font-bold tracking-tighter">
+                      {healthData?.score || 0}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center md:items-start text-center md:text-left">
+                  <span className={`inline-block px-4 py-1.5 rounded-full text-sm font-semibold mb-2 ${(healthData?.score || 0) > 70 ? 'bg-success/10 text-success' : (healthData?.score || 0) > 40 ? 'bg-warning/10 text-warning' : 'bg-danger/10 text-danger'}`}>
+                    {healthData?.status || "Belum Ada Data"}
                   </span>
-                  <p className="text-success text-sm font-medium flex items-center gap-1">
-                    ↑ 3 poin bulan ini
+                  <p className="text-muted-foreground text-sm flex items-center gap-1 mt-2">
+                    Skor dinilai oleh AI
                   </p>
                 </div>
               </div>
