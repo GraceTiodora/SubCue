@@ -2,10 +2,10 @@
 
 # 💳 SubCue AI
 
-### AI Financial Wellness for Digital Subscriptions
+### Kecerdasan Buatan untuk Kesehatan Finansial Langganan Digital Anda
 
-**Never pay for forgotten subscriptions again.**  
-**Smarter subscriptions. Healthier spending.**
+**Jangan pernah lagi membayar untuk langganan yang Anda lupakan.**  
+**Langganan lebih cerdas. Keuangan lebih sehat.**
 
 --- 
 
@@ -14,65 +14,63 @@
 ![Groq](https://img.shields.io/badge/Groq-Llama3-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-**[Live Demo on Vercel](#) | [Public GitHub Repository](#)** *(URLs pending deployment)*
+**[Live Demo (Netlify)](https://agent-6a61c1d41cb6ced1a0822675--subcue.netlify.app/) | [Public GitHub Repository](#)**
 
 </div>
 
 ---
 
-## 1. Context & The Problem
+## 1. Latar Belakang Masalah (The Problem)
 
-Digital subscriptions have become part of everyday life. Streaming platforms, AI tools, cloud storage, productivity software, and gaming services often renew automatically. As users subscribe to more services, they face several challenges:
+Di era digital saat ini, layanan berlangganan (Netflix, Spotify, ChatGPT, Zoom, dll) telah menjadi kebutuhan primer. Namun, kemudahan berlangganan seringkali menjebak pengguna ke dalam masalah keuangan terselubung yang dikenal sebagai **"Subscription Fatigue" (Kelelahan Berlangganan)**. 
 
-* Forgetting renewal dates
-* Losing track of monthly spending
-* Paying for services they rarely use
-* Keeping multiple subscriptions with overlapping functionality
-* Lacking visibility into long-term subscription costs
+Berdasarkan analisis kami, pengguna sering menghadapi masalah berikut:
+1. **Lupa Tanggal Tagihan:** Sistem *auto-renewal* (perpanjangan otomatis) sering menyedot saldo rekening secara diam-diam tanpa disadari.
+2. **Pemborosan Terselubung (Zombie Subscriptions):** Terus membayar layanan yang sangat jarang atau bahkan tidak pernah dipakai lagi.
+3. **Fungsi yang Tumpang Tindih:** Membayar Spotify sekaligus Apple Music, atau ChatGPT Plus sekaligus Claude Pro tanpa menyadari pemborosan fungsional.
+4. **Kebutaan Finansial Jangka Panjang:** Sulit melacak akumulasi pengeluaran bulanan karena terpecah di puluhan layanan berbeda.
 
-Most reminder applications only notify users before renewal. They do **not** help users understand whether those subscriptions are still worth paying for.
-
----
-
-## 2. The Solution
-
-**SubCue AI** combines intelligent reminders with AI-powered spending analysis. Instead of simply reminding users about upcoming renewals, SubCue AI evaluates subscription health and provides personalized recommendations to optimize recurring expenses.
-
-### Core Features
-* **Smart Renewal Reminder:** Auto-sync your upcoming bills directly to **Google Calendar** (H-3 Reminders).
-* **Enterprise Dashboard:** Monitor active subscriptions with a sleek 3-column layout.
-* **Advanced Analytics:** Interactive charts (using Recharts) mapping your historical and projected spending with dynamic time frames (3m, 6m, 1y).
-* **AI Efficiency Score:** Powered by **Groq & Llama-3**, AI calculates the health of your digital spending instantly.
-* **Personalized AI Recommendations:** Actionable advice on downgrading, cancelling, or keeping services in native Indonesian.
-* **AI Chat Assistant:** Ask natural language questions about your budget directly in the dashboard.
-* **Theme Support:** Polished Dark and Light mode toggling at the root level.
+Sayangnya, aplikasi pencatat keuangan atau pengingat jadwal biasa **hanya memberi notifikasi** tanpa memberikan wawasan tentang *apakah langganan tersebut masih layak dipertahankan*.
 
 ---
 
-## 3. Tech Stack & Architecture
+## 2. Solusi dari SubCue AI
 
-We built SubCue AI using a microservices-oriented approach, splitting the Frontend and Backend to ensure scalability.
+**SubCue AI** hadir bukan sekadar sebagai aplikasi pengingat, melainkan sebagai **Konsultan Keuangan Pribadi Berbasis AI**. Kami menggabungkan pengingat cerdas dengan analisis pengeluaran yang ditenagai oleh kecerdasan buatan.
 
-**Frontend (FE): Next.js + TailwindCSS + shadcn/ui**
-* Deployed on Vercel.
-* Handles UI, routing, and user interactions.
+Daripada sekadar mengingatkan Anda bahwa tagihan Netflix akan jatuh tempo, AI kami akan mengevaluasi tingkat penggunaan Anda dan merekomendasikan: *"Anda jarang memakai layanan X bulan ini, batalkan langganan tersebut untuk menghemat Rp 150.000!"*
 
-**Backend (Microservice): FastAPI + Python + SQLite**
-* Deployed on Railway / Render.
-* Handles AI logic (integrating with **Groq API / Llama-3** for ultra-low latency responses).
-* Fallback support to OpenRouter.
-
-**Why this architecture?**
-Separating the backend allows us to easily scale the AI processing engine, utilize Python's robust AI/ML ecosystem, and leverage Groq's lightning-fast inference, while Next.js handles a blazing-fast React frontend.
+### Fitur Unggulan (Core Features)
+* **Skor Efisiensi AI:** Ditenagai oleh **Groq & Llama-3**, AI secara instan menghitung tingkat kesehatan pengeluaran digital Anda dari skala 0-100.
+* **Rekomendasi AI Personal:** Saran konkret dan *actionable* (berhenti berlangganan, *downgrade*, atau pertahankan) murni dalam Bahasa Indonesia.
+* **Integrasi Otomatis Google Calendar:** 1-klik untuk memasang pengingat otomatis **3 Hari Sebelum (H-3)** jadwal tagihan.
+* **Analitik Visual & Proyeksi:** Grafik interaktif (menggunakan Recharts) untuk melacak tren pengeluaran (3 bulan, 6 bulan, 1 tahun).
+* **Asisten Chat AI:** Tanyakan pertanyaan finansial kompleks kepada bot kami langsung dari Dashboard.
+* **Dukungan Tema (Light/Dark Mode):** Antarmuka elegan dan mulus yang menyesuaikan kenyamanan mata pengguna.
 
 ---
 
-## 4. Execution & How to Run Locally
+## 3. Arsitektur & Teknologi
 
-### Execution Status
-**Status:** MVP Completed within the 3-hour hackathon timeframe.
+SubCue AI dibangun dengan pendekatan **Microservices** yang memisahkan Frontend dan Backend untuk memastikan latensi minimal dan skalabilitas maksimal.
 
-### How to Run
+**Frontend: Next.js 14 + TailwindCSS + shadcn/ui**
+* Menyajikan UI responsif 3-kolom bergaya *Enterprise Dashboard*.
+
+**Backend: FastAPI + Python + SQLite**
+* Menangani seluruh *logical routing* dan integrasi API AI (menggunakan **Groq API / Llama-3** untuk inferensi super cepat tanpa *delay*).
+
+**Mengapa Arsitektur Ini?**
+Pemisahan backend memungkinkan kami memanfaatkan ekosistem AI/ML Python yang sangat matang secara maksimal. Dengan menggunakan Groq API, kami mendapatkan kecepatan respons AI yang tidak mungkin dicapai oleh *provider* tradisional, sementara Next.js menyajikan interaktivitas instan di sisi pengguna.
+
+---
+
+## 4. Panduan Menjalankan Aplikasi Lokal
+
+### Status Pengerjaan
+**Status:** MVP Selesai dalam rentang waktu Hackathon 3 Jam.
+
+### Langkah Menjalankan
 
 **1. Clone Repository**
 ```bash
@@ -80,62 +78,57 @@ git clone https://github.com/username/SubCue-ai.git
 cd SubCue-ai
 ```
 
-**2. Backend Setup (FastAPI)**
+**2. Setup Backend (FastAPI)**
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-# Copy environment variables
-cp .env.example .env
-# Run server
+cp .env.example .env # (Isi kunci GROQ_API_KEY Anda)
 uvicorn main:app --reload
 ```
 
-**3. Frontend Setup (Next.js)**
+**3. Setup Frontend (Next.js)**
 ```bash
 cd frontend
 npm install
-# Copy environment variables
-cp .env.example .env.local
-# Run server
+cp .env.example .env.local # (Isi NEXT_PUBLIC_API_URL=http://localhost:8000)
 npm run dev
 ```
 
 ---
 
-## 5. Security & Challenge Handling
+## 5. Keamanan & Penanganan Tantangan Hackathon
 
-**How we prevent Leaked API Keys (Security Challenge)**
-During the hackathon, a common challenge is accidentally pushing API keys (like Groq/OpenRouter keys) to GitHub. To prevent this, we implemented:
-1. **Environment Variables:** All sensitive keys are stored in `.env` files.
-2. **.gitignore strictness:** Ensured `.env`, `.env.local`, and any SQLite `.db` files are in `.gitignore` from the very first commit.
-3. **Environment Templates:** Provided `.env.example` files containing only dummy keys for safe sharing.
-4. **Platform Secrets:** Real keys are only injected directly into the deployment platforms' environment variables settings.
-
----
-
-## 6. Working Demo (MVP Scope)
-
-What is 100% functional right now in the demo:
-
-- [x] **Subscription Management:** Full CRUD operations via interactive Modal overlay.
-- [x] **Financial Dashboard:** Real-time metrics with dynamic budget calculations.
-- [x] **Google Calendar Integration:** 1-click automatic event generation for H-3 bill reminders.
-- [x] **Advanced Analytics UI:** Responsive line charts rendering projection trends.
-- [x] **AI Efficiency Score:** Instant Llama-3 powered spending health assessments.
-- [x] **Actionable AI Recommendations:** Context-aware cancellation advice.
-- [x] **AI Chat Assistant:** Context-injected chatbot capable of answering questions about user's active subscriptions.
-- [x] **Theming:** Full Dark/Light mode support via CSS variables.
+**Mencegah Kebocoran API Key (Security Measure)**
+Dalam kompetisi Hackathon, kebocoran API Key AI di GitHub sangat sering terjadi. Kami melakukan mitigasi ketat:
+1. **Environment Variables:** Semua token sensitif disimpan aman di `.env`.
+2. **Aturan .gitignore:** Memblokir pengunggahan `.env`, `.env.local`, dan file database `*.db` sejak *commit* pertama.
+3. **Platform Secrets:** Kunci asli hanya disuntikkan secara aman melalui *dashboard* environment Netlify/Vercel.
 
 ---
 
-## 7. Commit Convention
+## 6. Cakupan Fungsionalitas MVP (100% Bekerja)
 
-We use the standard Conventional Commits structure to maintain a clean history during the rapid hackathon sprint:
-* `feat:` A new feature (e.g., `feat: add AI health score calculation`)
-* `fix:` A bug fix
-* `docs:` Documentation only changes (e.g., `docs: update README with demo links`)
-* `style:` Changes that do not affect the meaning of the code (formatting, missing semi-colons)
-* `refactor:` A code change that neither fixes a bug nor adds a feature
-* `chore:` Updating build tasks, package manager configs, etc.
+Seluruh fitur di bawah ini bukanlah *dummy* atau prototipe statis, melainkan **100% berfungsi**:
+
+- [x] **Manajemen Langganan (CRUD):** Tambah, lihat, dan hapus data via Form Modal.
+- [x] **Dashboard Keuangan Real-time:** Kalkulasi sisa anggaran dan total biaya.
+- [x] **Integrasi Google Calendar:** Jadwal H-3 tagihan dikonversi langsung ke URL kalender.
+- [x] **Grafik Analitik Tingkat Lanjut:** Visualisasi garis proyeksi keuangan.
+- [x] **Skor Efisiensi AI:** Penilaian cerdas didukung oleh *prompt engineering* Llama-3.
+- [x] **Rekomendasi Cerdas:** Sistem membedah tumpang-tindih fungsional dari daftar langganan.
+- [x] **Chatbot AI Kontekstual:** Bot yang "tahu" isi dompet digital Anda.
+- [x] **Mode Terang & Gelap:** Transisi tema tingkat *root* yang mulus.
+
+---
+
+## 7. Standar Komit (Commit Convention)
+
+Kami menggunakan struktur *Conventional Commits* untuk menjaga kebersihan riwayat pengerjaan kami selama kompetisi *sprint* ini:
+* `feat:` Fitur baru
+* `fix:` Perbaikan kutu (bug)
+* `docs:` Pembaruan dokumentasi (seperti README ini)
+* `style:` Penataan kode (format, dll)
+* `refactor:` Restrukturisasi kode tanpa mengubah fungsi
+* `chore:` Pemeliharaan dependensi atau konfigurasi
