@@ -88,10 +88,11 @@ def get_health_score(db: Session = Depends(get_db)):
     
     Provide a JSON response with the following keys exactly:
     - "score": an integer from 0 to 100 indicating subscription health (100 is best). Punish low usage subscriptions.
-    - "status": a short string like "Healthy", "Needs Review", or "Critical".
+    - "status": a short string like "Sehat", "Perlu Review", or "Kritis" (MUST BE IN INDONESIAN).
     - "potential_saving": an estimated integer value of how much they could save monthly by optimizing or cancelling low-usage/overlapping subs.
-    - "recommendations": a list of 3-4 specific string recommendations (e.g., "Consider cancelling X due to low usage").
-    
+    - "recommendations": a list of 3-4 specific string recommendations (MUST BE IN INDONESIAN).
+
+    PENTING: Seluruh teks rekomendasi dan status WAJIB ditulis murni dalam BAHASA INDONESIA.
     Return ONLY valid JSON. No markdown formatting blocks around the JSON.
     """
     
@@ -140,7 +141,7 @@ def chat_with_ai(query: dict, db: Session = Depends(get_db)):
                 {"role": "user", "content": user_message}
             ]
         )
-        return {"response": completion.choices[0].message.content}
+        return {"reply": completion.choices[0].message.content}
     except Exception as e:
         print("Chat AI Error:", str(e))
-        return {"response": f"I'm sorry, I cannot connect to the AI right now. Error: {str(e)}"}
+        return {"reply": f"Maaf, saya tidak dapat merespons saat ini. Error internal: {str(e)}"}

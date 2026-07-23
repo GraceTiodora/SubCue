@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Plus, Trash2, CalendarDays } from "lucide-react";
 
 interface Subscription {
   id?: number;
@@ -12,7 +13,11 @@ interface Subscription {
   usage_level: string;
 }
 
-export default function SubscriptionList() {
+interface Props {
+  readonly?: boolean;
+}
+
+export default function SubscriptionList({ readonly = false }: Props) {
   const [subs, setSubs] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -44,6 +49,16 @@ export default function SubscriptionList() {
 
   useEffect(() => {
     fetchSubs();
+    
+    // Listen for custom event from Header to open the form
+    const handleTriggerForm = () => {
+      setShowAddForm(true);
+      // Optional: Scroll to the form
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    };
+    
+    window.addEventListener('trigger-add-form', handleTriggerForm);
+    return () => window.removeEventListener('trigger-add-form', handleTriggerForm);
   }, []);
 
   const handleAdd = (e: React.FormEvent) => {
@@ -57,9 +72,9 @@ export default function SubscriptionList() {
     .then(() => {
       setShowAddForm(false);
       fetchSubs(); // refresh list
-      // Tell parent to refresh health score in a real app, 
-      // but for hackathon we might just reload the window
-      window.location.reload();
+      
+      // Dispatch custom event to notify Dashboard to refresh health score
+      window.dispatchEvent(new Event('subscription-updated'));
     })
     .catch(err => console.error(err));
   };
@@ -67,7 +82,9 @@ export default function SubscriptionList() {
   const handleDelete = (id: number) => {
     fetch(`http://127.0.0.1:8000/subscriptions/${id}`, { method: "DELETE" })
       .then(() => {
-        window.location.reload();
+        fetchSubs(); // refresh list
+        // Dispatch custom event to notify Dashboard to refresh health score
+        window.dispatchEvent(new Event('subscription-updated'));
       });
   };
 
@@ -75,12 +92,14 @@ export default function SubscriptionList() {
     <div className="mt-12 glass-panel p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold">Langganan Aktif</h2>
-        <button 
-          onClick={() => setShowAddForm(!showAddForm)}
-          className="bg-card hover:bg-border text-sm px-4 py-2 rounded-lg transition-colors border border-border"
-        >
-          {showAddForm ? "Batal" : "+ Tambah Baru"}
-        </button>
+        {!readonly && (
+          <button 
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="bg-primary hover:bg-indigo-500 text-white text-sm px-4 py-2.5 rounded-lg transition-all flex items-center gap-2 font-medium shadow-[0_0_15px_rgba(99,102,241,0.3)]"
+          >
+            {showAddForm ? "Batal" : <><Plus className="w-4 h-4" /> Tambah Langganan</>}
+          </button>
+        )}
       </div>
 
       {showAddForm && (
@@ -153,16 +172,21 @@ export default function SubscriptionList() {
             .map((sub, i) => {
               const daysLeft = Math.ceil((new Date(sub.next_renewal).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
               return (
-                <div key={i} className="bg-card border border-border rounded-xl p-4 flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">{sub.name}</p>
-                    <p className="text-sm text-muted-foreground">{sub.next_renewal}</p>
+                <div key={i} className="bg-background border border-border/50 rounded-xl p-5 flex items-center justify-between shadow-sm hover:border-primary/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center text-muted-foreground">
+                      <CalendarDays className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-foreground">{sub.name}</p>
+                      <p className="text-xs text-muted-foreground">{sub.next_renewal}</p>
+                    </div>
                   </div>
                   <div className="text-right">
                     <p className={`font-semibold ${daysLeft <= 3 ? 'text-danger' : daysLeft <= 7 ? 'text-warning' : 'text-success'}`}>
                       {daysLeft === 0 ? "Hari ini" : `${daysLeft} hari lagi`}
                     </p>
-                    <p className="text-xs text-muted-foreground">Rp {sub.cost.toLocaleString('id-ID')}</p>
+                    <p className="text-sm font-medium text-muted-foreground mt-0.5">Rp {sub.cost.toLocaleString('id-ID')}</p>
                   </div>
                 </div>
               );
@@ -181,13 +205,13 @@ export default function SubscriptionList() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-border text-muted-foreground text-sm">
-                <th className="pb-3 font-medium">Layanan</th>
-                <th className="pb-3 font-medium">Biaya</th>
-                <th className="pb-3 font-medium">Siklus</th>
-                <th className="pb-3 font-medium">Tagihan Berikutnya</th>
-                <th className="pb-3 font-medium">Penggunaan</th>
-                <th className="pb-3 font-medium text-right">Aksi</th>
+              <tr className="border-b border-border/50 text-muted-foreground text-sm">
+                <th className="pb-4 font-medium uppercase tracking-wider text-xs">Layanan</th>
+                <th className="pb-4 font-medium uppercase tracking-wider text-xs">Biaya</th>
+                <th className="pb-4 font-medium uppercase tracking-wider text-xs">Siklus</th>
+                <th className="pb-4 font-medium uppercase tracking-wider text-xs">Tagihan Berikutnya</th>
+                <th className="pb-4 font-medium uppercase tracking-wider text-xs">Penggunaan</th>
+                {!readonly && <th className="pb-4 font-medium uppercase tracking-wider text-xs text-right">Aksi</th>}
               </tr>
             </thead>
             <tbody>
@@ -197,14 +221,18 @@ export default function SubscriptionList() {
                   <td className="py-4 text-warning">Rp {sub.cost.toLocaleString('id-ID')}</td>
                   <td className="py-4 capitalize">{sub.billing_cycle}</td>
                   <td className="py-4">{sub.next_renewal}</td>
-                  <td className="py-4">
-                    <span className={`px-2 py-1 rounded text-xs ${sub.usage_level === 'high' ? 'bg-success/20 text-success' : sub.usage_level === 'low' ? 'bg-danger/20 text-danger' : 'bg-warning/20 text-warning'}`}>
-                      {sub.usage_level}
+                  <td className="py-5">
+                    <span className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide ${sub.usage_level === 'high' ? 'bg-success/10 text-success border border-success/20' : sub.usage_level === 'low' ? 'bg-danger/10 text-danger border border-danger/20' : 'bg-warning/10 text-warning border border-warning/20'}`}>
+                      {sub.usage_level.toUpperCase()}
                     </span>
                   </td>
-                  <td className="py-4 text-right">
-                    <button onClick={() => sub.id && handleDelete(sub.id)} className="text-danger hover:text-red-400 text-sm">Hapus</button>
-                  </td>
+                  {!readonly && (
+                    <td className="py-5 text-right">
+                      <button onClick={() => sub.id && handleDelete(sub.id)} className="text-muted-foreground hover:text-danger hover:bg-danger/10 p-2 rounded-lg transition-all" title="Hapus">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

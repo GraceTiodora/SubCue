@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0f1117;
-  --color-foreground: #f8fafc;
-  --color-card: #1e212b;
-  --color-border: #2e3340;
-  --color-primary: #6366f1;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
+  --color-background: #0B0E14; /* Deep Navy Black */
+  --color-foreground: #F8FAFC;
+  --color-card: #151A23; /* Dark Navy Card */
+  --color-border: #232B3E; /* Dark Border */
+  --color-primary: #6366F1; /* Indigo */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-danger: #EF4444;
 }
 
 body {
@@ -19,9 +19,8 @@ body {
 }
 
 .glass-panel {
-  background: rgba(30, 33, 43, 0.6);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
   border-radius: 1rem;
 }
 
