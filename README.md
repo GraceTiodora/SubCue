@@ -2,7 +2,7 @@
 
 # 💳 SubCue AI
 
-### Kecerdasan Buatan untuk Kesehatan Finansial Langganan Digital Anda
+### Konsultan Cerdas untuk Kesehatan Finansial Langganan Digital Anda
 
 **Jangan pernah lagi membayar untuk langganan yang Anda lupakan.**  
 **Langganan lebih cerdas. Keuangan lebih sehat.**
@@ -14,7 +14,7 @@
 ![Groq](https://img.shields.io/badge/Groq-Llama3-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-**[Live Demo (Netlify)](https://agent-6a61c1d41cb6ced1a0822675--subcue.netlify) | [Public GitHub Repository](#)**
+**[Live Demo (Netlify)](#) | [Public GitHub Repository](https://github.com/GraceTiodora/SubCue)**
 
 </div>
 
@@ -24,29 +24,29 @@
 
 Di era digital saat ini, layanan berlangganan (Netflix, Spotify, ChatGPT, Zoom, dll) telah menjadi kebutuhan primer. Namun, kemudahan berlangganan seringkali menjebak pengguna ke dalam masalah keuangan terselubung yang dikenal sebagai **"Subscription Fatigue" (Kelelahan Berlangganan)**. 
 
-Berdasarkan analisis kami, pengguna sering menghadapi masalah berikut:
-1. **Lupa Tanggal Tagihan:** Sistem *auto-renewal* (perpanjangan otomatis) sering menyedot saldo rekening secara diam-diam tanpa disadari.
+Masalah utama yang dihadapi pengguna:
+1. **Lupa Tanggal Tagihan:** Sistem *auto-renewal* menyedot saldo rekening secara diam-diam.
 2. **Pemborosan Terselubung (Zombie Subscriptions):** Terus membayar layanan yang sangat jarang atau bahkan tidak pernah dipakai lagi.
-3. **Fungsi yang Tumpang Tindih:** Membayar Spotify sekaligus Apple Music, atau ChatGPT Plus sekaligus Claude Pro tanpa menyadari pemborosan fungsional.
-4. **Kebutaan Finansial Jangka Panjang:** Sulit melacak akumulasi pengeluaran bulanan karena terpecah di puluhan layanan berbeda.
+3. **Fungsi yang Tumpang Tindih:** Membayar Spotify sekaligus Apple Music tanpa menyadari pemborosan fungsional.
+4. **Kebutaan Finansial Jangka Panjang:** Sulit melacak akumulasi pengeluaran bulanan karena terpecah di berbagai aplikasi.
 
-Sayangnya, aplikasi pencatat keuangan atau pengingat jadwal biasa **hanya memberi notifikasi** tanpa memberikan wawasan tentang *apakah langganan tersebut masih layak dipertahankan*.
+Sayangnya, aplikasi pencatat keuangan biasa **hanya memberi notifikasi** tanpa memberikan wawasan tentang *apakah langganan tersebut masih layak dipertahankan*.
 
 ---
 
 ## 2. Solusi dari SubCue AI
 
-**SubCue AI** hadir bukan sekadar sebagai aplikasi pengingat, melainkan sebagai **Konsultan Keuangan Pribadi Berbasis AI**. Kami menggabungkan pengingat cerdas dengan analisis pengeluaran yang ditenagai oleh kecerdasan buatan.
+**SubCue AI** hadir bukan sekadar sebagai aplikasi pengingat, melainkan sebagai **Konsultan Keuangan Pribadi Berbasis AI**. Kami menggabungkan pelacakan cerdas dengan analisis pengeluaran yang ditenagai oleh kecerdasan buatan.
 
 Daripada sekadar mengingatkan Anda bahwa tagihan Netflix akan jatuh tempo, AI kami akan mengevaluasi tingkat penggunaan Anda dan merekomendasikan: *"Anda jarang memakai layanan X bulan ini, batalkan langganan tersebut untuk menghemat Rp 150.000!"*
 
-### Fitur Unggulan (Core Features)
+### Fitur Unggulan Terkini (Core Features)
 * **Skor Efisiensi AI:** Ditenagai oleh **Groq & Llama-3**, AI secara instan menghitung tingkat kesehatan pengeluaran digital Anda dari skala 0-100.
-* **Rekomendasi AI Personal:** Saran konkret dan *actionable* (berhenti berlangganan, *downgrade*, atau pertahankan) murni dalam Bahasa Indonesia.
-* **Integrasi Otomatis Google Calendar:** 1-klik untuk memasang pengingat otomatis **3 Hari Sebelum (H-3)** jadwal tagihan.
-* **Analitik Visual & Proyeksi:** Grafik interaktif (menggunakan Recharts) untuk melacak tren pengeluaran (3 bulan, 6 bulan, 1 tahun).
-* **Asisten Chat AI:** Tanyakan pertanyaan finansial kompleks kepada bot kami langsung dari Dashboard.
-* **Dukungan Tema (Light/Dark Mode):** Antarmuka elegan dan mulus yang menyesuaikan kenyamanan mata pengguna.
+* **Pemindai Struk Otomatis (OCR AI):** Unggah tangkapan layar (screenshot) tagihan langganan Anda, dan AI Vision akan otomatis mengekstrak nama, harga, dan jadwal tagihan tanpa perlu mengetik manual.
+* **Integrasi Google Calendar:** Jadwalkan pengingat H-3 langsung ke kalender Google Anda dengan satu klik saat menambah langganan.
+* **Asisten Chat AI Kontekstual:** Tanyakan saran keuangan secara langsung. Chatbot dilengkapi dengan sistem keamanan **Anti-Prompt Injection** yang ketat.
+* **Analitik Visual & Proyeksi Keuangan:** Grafik interaktif (Line Chart) untuk melacak tren pengeluaran bulanan.
+* **UI/UX Reaktif Seketika (Real-Time Sync):** Perubahan pada profil, anggaran, dan daftar langganan akan langsung mengubah kalkulasi Dashboard secara *real-time* tanpa *refresh*.
 
 ---
 
@@ -54,28 +54,23 @@ Daripada sekadar mengingatkan Anda bahwa tagihan Netflix akan jatuh tempo, AI ka
 
 SubCue AI dibangun dengan pendekatan **Microservices** yang memisahkan Frontend dan Backend untuk memastikan latensi minimal dan skalabilitas maksimal.
 
-**Frontend: Next.js 14 + TailwindCSS + shadcn/ui**
-* Menyajikan UI responsif 3-kolom bergaya *Enterprise Dashboard*.
+**Frontend: Next.js 14 + TailwindCSS + Lucide Icons + Recharts**
+* Menyajikan UI responsif, reaktif, dan minimalis bergaya *Enterprise Dashboard*. State management murni memanfaatkan React Hooks termodern dan sistem custom event listeners browser.
 
 **Backend: FastAPI + Python + SQLite**
-* Menangani seluruh *logical routing* dan integrasi API AI (menggunakan **Groq API / Llama-3** untuk inferensi super cepat tanpa *delay*).
+* Menangani routing modular dan integrasi API AI (menggunakan **Groq API / Llama-3** untuk inferensi kilat). Dilengkapi arsitektur modular `core/prompts.py` untuk manajemen prompt skala besar.
 
 **Mengapa Arsitektur Ini?**
-Pemisahan backend memungkinkan kami memanfaatkan ekosistem AI/ML Python yang sangat matang secara maksimal. Dengan menggunakan Groq API, kami mendapatkan kecepatan respons AI yang tidak mungkin dicapai oleh *provider* tradisional, sementara Next.js menyajikan interaktivitas instan di sisi pengguna.
+Pemisahan backend memungkinkan kami memanfaatkan ekosistem AI/ML Python secara maksimal. Dengan API eksternal ultra-cepat, kami mendapatkan kecepatan respons AI instan, sementara Next.js menyajikan antarmuka visual kelas dunia tanpa jeda (*lag*).
 
 ---
 
 ## 4. Panduan Menjalankan Aplikasi Lokal
 
-### Status Pengerjaan
-**Status:** MVP Selesai dalam rentang waktu Hackathon 3 Jam.
-
-### Langkah Menjalankan
-
 **1. Clone Repository**
 ```bash
-git clone https://github.com/username/SubCue-ai.git
-cd SubCue-ai
+git clone https://github.com/GraceTiodora/SubCue.git
+cd SubCue
 ```
 
 **2. Setup Backend (FastAPI)**
@@ -98,37 +93,25 @@ npm run dev
 
 ---
 
-## 5. Keamanan & Penanganan Tantangan Hackathon
+## 5. Keamanan & Penanganan Risiko (Security Measure)
 
-**Mencegah Kebocoran API Key (Security Measure)**
-Dalam kompetisi Hackathon, kebocoran API Key AI di GitHub sangat sering terjadi. Kami melakukan mitigasi ketat:
-1. **Environment Variables:** Semua token sensitif disimpan aman di `.env`.
-2. **Aturan .gitignore:** Memblokir pengunggahan `.env`, `.env.local`, dan file database `*.db` sejak *commit* pertama.
-3. **Platform Secrets:** Kunci asli hanya disuntikkan secara aman melalui *dashboard* environment Netlify/Vercel.
+1. **Anti-Prompt Injection:** Kami menanamkan *System Prompt* tertutup di backend yang secara eksplisit melarang AI menjalankan instruksi *jailbreak* atau menjawab pertanyaan di luar konteks manajemen langganan dan finansial.
+2. **Mencegah Kebocoran API Key:** Semua kunci rahasia disimpan secara aman dalam *Environment Variables* (`.env`) dan di-inject langsung melalui platform hosting.
+3. **Validasi Regex Ketat:** Mencegah masuknya format data (seperti email) yang tidak valid pada antarmuka Pengaturan, meminimalisir risiko manipulasi format.
 
 ---
 
 ## 6. Cakupan Fungsionalitas MVP (100% Bekerja)
 
-Seluruh fitur di bawah ini bukanlah *dummy* atau prototipe statis, melainkan **100% berfungsi**:
+Seluruh fitur di bawah ini bukanlah prototipe UI (*dummy*), melainkan **100% terintegrasi dan berfungsi**:
 
-- [x] **Manajemen Langganan (CRUD):** Tambah, lihat, dan hapus data via Form Modal.
-- [x] **Dashboard Keuangan Real-time:** Kalkulasi sisa anggaran dan total biaya.
-- [x] **Integrasi Google Calendar:** Jadwal H-3 tagihan dikonversi langsung ke URL kalender.
-- [x] **Grafik Analitik Tingkat Lanjut:** Visualisasi garis proyeksi keuangan.
-- [x] **Skor Efisiensi AI:** Penilaian cerdas didukung oleh *prompt engineering* Llama-3.
-- [x] **Rekomendasi Cerdas:** Sistem membedah tumpang-tindih fungsional dari daftar langganan.
-- [x] **Chatbot AI Kontekstual:** Bot yang "tahu" isi dompet digital Anda.
-- [x] **Mode Terang & Gelap:** Transisi tema tingkat *root* yang mulus.
+- [x] Manajemen Langganan (CRUD)
+- [x] Pemindai Gambar (Image Scanner) OCR AI
+- [x] Dashboard Keuangan Real-time dengan Kalkulasi
+- [x] Integrasi Cepat Google Calendar Pengingat H-3
+- [x] Grafik Analitik Tren Proyeksi Biaya
+- [x] Skor Efisiensi Finansial & Rekomendasi AI
+- [x] Chatbot Asisten AI Anti-Injection
+- [x] Manajemen Profil & Dinamika Anggaran
 
 ---
-
-## 7. Standar Komit (Commit Convention)
-
-Kami menggunakan struktur *Conventional Commits* untuk menjaga kebersihan riwayat pengerjaan kami selama kompetisi *sprint* ini:
-* `feat:` Fitur baru
-* `fix:` Perbaikan kutu (bug)
-* `docs:` Pembaruan dokumentasi (seperti README ini)
-* `style:` Penataan kode (format, dll)
-* `refactor:` Restrukturisasi kode tanpa mengubah fungsi
-* `chore:` Pemeliharaan dependensi atau konfigurasi

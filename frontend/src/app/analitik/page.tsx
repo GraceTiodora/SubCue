@@ -9,6 +9,7 @@ interface Subscription {
   category: string;
   billing_cycle: string;
   start_date?: string;
+  next_renewal?: string;
 }
 
 export default function AnalyticsPage() {
