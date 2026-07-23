@@ -20,8 +20,9 @@ export default function Dashboard() {
   const [showNotif, setShowNotif] = useState(false);
   const [username, setUsername] = useState("Pengguna");
   const [budget, setBudget] = useState(1500000);
-  const [upcomingBill, setUpcomingBill] = useState<{name: string, cost: number} | null>(null);
-  const [hasUnreadNotif, setHasUnreadNotif] = useState(true);
+  const [upcomingBill, setUpcomingBill] = useState<{name: string, cost: number, daysLeft: number} | null>(null);
+  const [aiInsight, setAiInsight] = useState<{type: 'warning' | 'success', text: string} | null>(null);
+  const [hasUnreadNotif, setHasUnreadNotif] = useState(false);
   const router = useRouter();
 
   const fetchHealthData = () => {
@@ -55,11 +56,42 @@ export default function Dashboard() {
     })
       .then(res => res.json())
       .then(data => {
+        let hasImportantNotif = false;
+        
         if (data && data.length > 0) {
-          // Ambil langganan pertama sebagai contoh tagihan terdekat
-          setUpcomingBill({ name: data[0].name, cost: data[0].cost });
+          // 1. Tagihan Terdekat (H-7)
+          const sorted = [...data].sort((a, b) => new Date(a.next_renewal).getTime() - new Date(b.next_renewal).getTime());
+          const upcoming = sorted.filter(a => new Date(a.next_renewal).getTime() >= new Date().setHours(0,0,0,0));
+          
+          if (upcoming.length > 0) {
+            const closest = upcoming[0];
+            const daysLeft = Math.ceil((new Date(closest.next_renewal).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+            if (daysLeft <= 7) {
+              setUpcomingBill({ name: closest.name, cost: closest.cost, daysLeft });
+              hasImportantNotif = true;
+            } else {
+              setUpcomingBill(null);
+            }
+          } else {
+            setUpcomingBill(null);
+          }
+
+          // 2. AI Insight (Low Usage Warning)
+          const lowUsage = data.find((s: any) => s.usage_level === 'low');
+          if (lowUsage) {
+            setAiInsight({ type: 'warning', text: `Peringatan Efisiensi: Anda jarang memakai ${lowUsage.name}. Pertimbangkan untuk membatalkannya untuk berhemat Rp ${lowUsage.cost.toLocaleString('id-ID')}.` });
+            hasImportantNotif = true;
+          } else {
+            setAiInsight({ type: 'success', text: "Pengeluaran Anda efisien. Lanjutkan kebiasaan baik ini!" });
+          }
         } else {
           setUpcomingBill(null);
+          setAiInsight(null);
+        }
+        
+        // Hanya tampilkan titik merah jika ada tagihan H-7 atau ada warning efisiensi
+        if (hasImportantNotif) {
+          setHasUnreadNotif(true);
         }
       })
       .catch(err => console.error(err));
@@ -124,7 +156,7 @@ export default function Dashboard() {
             </button>
             
             {showNotif && (
-              <div className="absolute top-12 right-12 w-72 bg-card border border-border/50 rounded-xl shadow-lg p-4 z-50">
+              <div className="absolute top-12 right-12 w-80 bg-card border border-border/50 rounded-xl shadow-lg p-4 z-50">
                 <h4 className="font-semibold text-sm mb-3">Notifikasi</h4>
                 <div className="space-y-3">
                   <div className="flex gap-3 text-sm border-b border-border/50 pb-3">
@@ -135,23 +167,25 @@ export default function Dashboard() {
                       {upcomingBill ? (
                         <>
                           <p className="font-medium">Tagihan Hampir Tiba</p>
-                          <p className="text-muted-foreground text-xs mt-0.5">{upcomingBill.name} (Rp {upcomingBill.cost.toLocaleString('id-ID')}) akan ditagih dalam waktu dekat.</p>
+                          <p className="text-muted-foreground text-xs mt-0.5">{upcomingBill.name} (Rp {upcomingBill.cost.toLocaleString('id-ID')}) akan ditagih dalam {upcomingBill.daysLeft === 0 ? 'hari ini' : `${upcomingBill.daysLeft} hari lagi`}.</p>
                         </>
                       ) : (
                         <>
-                          <p className="font-medium">Semua Aman!</p>
-                          <p className="text-muted-foreground text-xs mt-0.5">Belum ada tagihan langganan dalam waktu dekat.</p>
+                          <p className="font-medium text-success">Semua Aman!</p>
+                          <p className="text-muted-foreground text-xs mt-0.5">Tidak ada tagihan dalam 7 hari ke depan.</p>
                         </>
                       )}
                     </div>
                   </div>
                   <div className="flex gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${aiInsight?.type === 'warning' ? 'bg-danger/10 text-danger' : 'bg-primary/10 text-primary'}`}>
                       <Activity className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="font-medium">Sistem Pemantauan Aktif</p>
-                      <p className="text-muted-foreground text-xs mt-0.5">AI terus memantau efisiensi pengeluaran Anda.</p>
+                      <p className="font-medium">Sistem Pemantauan AI</p>
+                      <p className="text-muted-foreground text-xs mt-0.5 leading-relaxed">
+                        {aiInsight ? aiInsight.text : "AI terus memantau efisiensi pengeluaran Anda."}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -272,7 +306,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        <SubscriptionList readonly={true} />
+        <SubscriptionList readonly={false} />
       </main>
     </div>
   );

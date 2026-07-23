@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Plus, Trash2, CalendarDays, Upload, Loader2, Image as ImageIcon } from "lucide-react";
+import { Plus, Trash2, CalendarDays, Upload, Loader2, Image as ImageIcon, RefreshCw } from "lucide-react";
 
 // Helper function to generate GCal URL for H-3
 const getGcalUrl = (name: string, cost: number, next_renewal: string) => {
@@ -10,6 +10,18 @@ const getGcalUrl = (name: string, cost: number, next_renewal: string) => {
   d.setDate(d.getDate() - 3);
   const reminderDateStr = d.toISOString().split('T')[0].replace(/-/g, '');
   return `https://calendar.google.com/calendar/u/0/r/eventedit?text=Pengingat+Tagihan+${encodeURIComponent(name)}+%28H-3%29&dates=${reminderDateStr}T090000Z/${reminderDateStr}T100000Z&details=Pengingat+otomatis+SubWise+AI+untuk+tagihan+${encodeURIComponent(name)}+sebesar+Rp${cost.toLocaleString('id-ID')}+pada+tanggal+${next_renewal}`;
+};
+
+const canAddToCalendar = (next_renewal: string) => {
+  if (!next_renewal) return false;
+  const renewalDate = new Date(next_renewal);
+  renewalDate.setDate(renewalDate.getDate() - 3); // H-3
+  renewalDate.setHours(0,0,0,0);
+  
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  
+  return renewalDate >= today;
 };
 
 interface Subscription {
@@ -99,8 +111,12 @@ export default function SubscriptionList({ readonly = false }: Props) {
 
       // If user checked add to calendar, open the link
       if (addToCalendar && formData.name && formData.next_renewal) {
-        const gcalUrl = getGcalUrl(formData.name, formData.cost, formData.next_renewal);
-        window.open(gcalUrl, '_blank');
+        if (canAddToCalendar(formData.next_renewal)) {
+          const gcalUrl = getGcalUrl(formData.name, formData.cost, formData.next_renewal);
+          window.open(gcalUrl, '_blank');
+        } else {
+          alert("Catatan: Jadwal pengingat H-3 sudah terlewat untuk periode ini, sehingga tidak ditambahkan ke kalender.");
+        }
       }
       
       // Reset form
@@ -293,7 +309,7 @@ export default function SubscriptionList({ readonly = false }: Props) {
                     <p className={`font-medium ${daysLeft <= 3 ? 'text-danger' : daysLeft <= 7 ? 'text-warning' : 'text-success'}`}>
                       {daysLeft === 0 ? "Hari ini" : `${daysLeft} hari lagi`}
                     </p>
-                    <p className="text-base font-bold text-foreground mt-0.5">Rp {sub.cost.toLocaleString('id-ID')}</p>
+                    <p className="text-base font-bold text-foreground mt-0.5 mb-2">Rp {sub.cost.toLocaleString('id-ID')}</p>
                   </div>
                 </div>
               );
@@ -345,12 +361,7 @@ export default function SubscriptionList({ readonly = false }: Props) {
                   <td className="py-4 text-warning">Rp {sub.cost.toLocaleString('id-ID')}</td>
                   <td className="py-4 capitalize">{sub.billing_cycle}</td>
                   <td className="py-4">
-                    <div className="flex items-center gap-2">
-                      {sub.next_renewal}
-                      <a href={gcalUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-indigo-400 p-1 rounded-md hover:bg-primary/10 transition-colors" title="Simpan ke Google Calendar">
-                        <CalendarDays className="w-4 h-4" />
-                      </a>
-                    </div>
+                    {sub.next_renewal}
                   </td>
                   <td className="py-5">
                     <span className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide ${sub.usage_level === 'high' ? 'bg-success/10 text-success border border-success/20' : sub.usage_level === 'low' ? 'bg-danger/10 text-danger border border-danger/20' : 'bg-warning/10 text-warning border border-warning/20'}`}>
@@ -358,10 +369,12 @@ export default function SubscriptionList({ readonly = false }: Props) {
                     </span>
                   </td>
                   {!readonly && (
-                    <td className="py-5 text-right">
-                      <button onClick={() => sub.id && handleDelete(sub.id)} className="text-muted-foreground hover:text-danger hover:bg-danger/10 p-2 rounded-lg transition-all" title="Hapus">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                    <td className="py-5">
+                      <div className="flex justify-end gap-2">
+                        <button onClick={() => sub.id && handleDelete(sub.id)} className="p-2 text-muted-foreground hover:text-danger hover:bg-danger/10 rounded-lg transition-colors" title="Hapus">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   )}
                 </tr>
