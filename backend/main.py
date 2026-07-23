@@ -13,9 +13,9 @@ import models
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
-load_dotenv()
+load_dotenv(override=True)
 
-app = FastAPI(title="SubWise AI API")
+app = FastAPI(title="SubCue AI API")
 
 # Allow CORS for Next.js frontend
 app.add_middleware(
@@ -26,7 +26,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "dummy_key")
+print(f"DEBUG: Using API Key starting with: {OPENROUTER_API_KEY[:10]}...")
 
 # Create OpenAI client for OpenRouter
 client = OpenAI(
@@ -36,7 +37,7 @@ client = OpenAI(
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to SubWise AI API"}
+    return {"message": "Welcome to SubCue AI API"}
 
 @app.post("/subscriptions/", response_model=models.Subscription)
 def create_subscription(sub: models.SubscriptionCreate, db: Session = Depends(get_db)):
@@ -79,7 +80,7 @@ def get_health_score(db: Session = Depends(get_db)):
     subs_data = [{"name": s.name, "cost": s.cost, "cycle": s.billing_cycle, "usage": s.usage_level} for s in subs]
     
     prompt = f"""
-    You are SubWise AI, an expert financial advisor for digital subscriptions.
+    You are SubCue AI, an expert financial advisor for digital subscriptions.
     Analyze the following user subscriptions:
     {json.dumps(subs_data)}
     
@@ -96,7 +97,7 @@ def get_health_score(db: Session = Depends(get_db)):
     
     try:
         completion = client.chat.completions.create(
-            model="qwen/qwen-3-turbo", # We will use a fast model
+            model="openrouter/free",
             messages=[{"role": "user", "content": prompt}]
         )
         
@@ -118,7 +119,7 @@ def get_health_score(db: Session = Depends(get_db)):
             "status": "AI Offline",
             "monthly_spending": total_monthly,
             "potential_saving": 0,
-            "recommendations": ["Unable to generate recommendations right now."]
+            "recommendations": ["Tidak dapat menghasilkan rekomendasi saat ini."]
         }
 
 @app.post("/api/chat")
@@ -127,13 +128,13 @@ def chat_with_ai(query: dict, db: Session = Depends(get_db)):
     subs = db.query(models.SubscriptionDB).all()
     subs_data = [{"name": s.name, "cost": s.cost, "usage": s.usage_level} for s in subs]
     
-    system_prompt = f"""You are SubWise AI, a helpful financial assistant. 
-    The user has these subscriptions: {json.dumps(subs_data)}.
-    Keep your answers concise, practical, and focused on saving money."""
+    system_prompt = f"""Anda adalah SubCue AI, asisten keuangan pintar. 
+    Pengguna memiliki langganan berikut: {json.dumps(subs_data)}.
+    Jawablah selalu dalam Bahasa Indonesia dengan ramah, singkat, dan fokus pada penghematan uang."""
     
     try:
         completion = client.chat.completions.create(
-            model="qwen/qwen-3-turbo",
+            model="openrouter/free",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message}
@@ -141,4 +142,5 @@ def chat_with_ai(query: dict, db: Session = Depends(get_db)):
         )
         return {"response": completion.choices[0].message.content}
     except Exception as e:
-        return {"response": "I'm sorry, I cannot connect to the AI right now."}
+        print("Chat AI Error:", str(e))
+        return {"response": f"I'm sorry, I cannot connect to the AI right now. Error: {str(e)}"}

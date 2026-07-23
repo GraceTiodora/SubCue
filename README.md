@@ -115,11 +115,12 @@ During the hackathon, a common challenge is accidentally pushing API keys (like 
 ## 6. Working Demo (MVP Scope)
 
 What is functional right now in the demo:
-✅ Manual subscription input via the UI  
-✅ Financial Dashboard showing total spending  
-✅ AI-powered **Subscription Health Score** calculation  
-✅ Personalized AI Recommendations based on dummy/inputted user data  
-✅ AI Chat Assistant for queries  
+
+Manual subscription input via the UI  
+Financial Dashboard showing total spending  
+AI-powered **Subscription Health Score** calculation  
+Personalized AI Recommendations based on dummy/inputted user data  
+AI Chat Assistant for queries  
 
 ---
 

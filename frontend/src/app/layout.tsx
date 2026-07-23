@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "SubWise AI | Smart Subscription Manager",
+  title: "SubCue AI | Smart Subscription Manager",
   description: "AI Financial Wellness for Digital Subscriptions",
 };
 
