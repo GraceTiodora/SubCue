@@ -2,15 +2,22 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, CreditCard, BarChart2, Settings, Moon, Sun } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [username, setUsername] = useState("Pengguna");
 
   useEffect(() => {
+    // Check authentication
+    const userId = localStorage.getItem("user_id");
+    if (!userId && pathname !== "/login") {
+      router.push("/login");
+      return;
+    }
     // Check initial theme
     const theme = localStorage.getItem("theme");
     if (theme === "light") {

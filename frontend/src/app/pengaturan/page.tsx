@@ -35,7 +35,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-8 pb-20 max-w-4xl">
+    <div className="p-8 pb-20">
       <header className="mb-10">
         <h1 className="text-3xl font-bold tracking-tight mb-2">Pengaturan</h1>
         <p className="text-muted-foreground">Sesuaikan preferensi akun dan batas anggaran Anda.</p>
@@ -73,7 +73,7 @@ export default function SettingsPage() {
               <label className="block text-sm font-medium text-muted-foreground mb-2">Email</label>
               <input 
                 type="text" 
-                value="grace@example.com" 
+                value={`${username.toLowerCase().replace(/\s+/g, '')}@example.com`} 
                 disabled 
                 className="w-full bg-background border border-border/50 rounded-lg px-4 py-3 text-sm text-foreground opacity-90 cursor-not-allowed focus:outline-none"
               />
@@ -114,9 +114,11 @@ export default function SettingsPage() {
         </div>
 
         {/* Danger Zone */}
-        <div className="bg-[#1a1114] border border-danger/20 rounded-2xl p-6 shadow-sm">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center text-danger">
+        <div className="bg-danger/5 dark:bg-[#1a1114] border border-danger/20 rounded-2xl p-6 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-danger/10 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none"></div>
+          
+          <div className="flex items-center gap-4 mb-6 relative z-10">
+            <div className="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center text-danger shrink-0">
               <ShieldAlert className="w-6 h-6" />
             </div>
             <div>
@@ -124,12 +126,13 @@ export default function SettingsPage() {
               <p className="text-sm text-muted-foreground">Tindakan ini tidak dapat dibatalkan.</p>
             </div>
           </div>
+          
           <button 
             onClick={handleResetData}
             disabled={isResetting}
-            className="flex items-center gap-2 px-5 py-2.5 border border-danger/30 rounded-lg text-sm font-medium text-danger hover:bg-danger/10 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2.5 border border-danger/30 rounded-lg text-sm font-medium text-danger hover:bg-danger/10 transition-colors disabled:opacity-50 relative z-10 w-fit"
           >
-            <Trash2 className="w-4 h-4" /> {isResetting ? "Menghapus..." : "Hapus Semua Data & Logout"}
+            <Trash2 className="w-4 h-4" /> {isResetting ? "Menghapus..." : "Hapus Semua Data"}
           </button>
         </div>
       </div>

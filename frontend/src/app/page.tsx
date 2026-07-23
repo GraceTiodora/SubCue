@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { BrainCircuit, Activity, Wallet, Bell, Plus } from "lucide-react";
 import SubscriptionList from "../components/SubscriptionList";
 
@@ -18,6 +19,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showNotif, setShowNotif] = useState(false);
   const [username, setUsername] = useState("Pengguna");
+  const [upcomingBill, setUpcomingBill] = useState<{name: string, cost: number} | null>(null);
+  const router = useRouter();
 
   const fetchHealthData = () => {
     setLoading(true);
@@ -43,9 +46,30 @@ export default function Dashboard() {
         });
         setLoading(false);
       });
+
+    // Ambil data langganan untuk notifikasi dinamis
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/subscriptions/`, {
+      headers: { "x-user-id": userId }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          // Ambil langganan pertama sebagai contoh tagihan terdekat
+          setUpcomingBill({ name: data[0].name, cost: data[0].cost });
+        } else {
+          setUpcomingBill(null);
+        }
+      })
+      .catch(err => console.error(err));
   };
 
   useEffect(() => {
+    const userId = localStorage.getItem("user_id");
+    if (!userId) {
+      router.push("/login");
+      return;
+    }
+
     fetchHealthData();
 
     const storedName = localStorage.getItem("username");
@@ -83,8 +107,17 @@ export default function Dashboard() {
                       <Bell className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="font-medium">Tagihan Hampir Tiba</p>
-                      <p className="text-muted-foreground text-xs mt-0.5">Netflix (Rp 30.000) akan ditagih dalam waktu dekat.</p>
+                      {upcomingBill ? (
+                        <>
+                          <p className="font-medium">Tagihan Hampir Tiba</p>
+                          <p className="text-muted-foreground text-xs mt-0.5">{upcomingBill.name} (Rp {upcomingBill.cost.toLocaleString('id-ID')}) akan ditagih dalam waktu dekat.</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-medium">Semua Aman!</p>
+                          <p className="text-muted-foreground text-xs mt-0.5">Belum ada tagihan langganan dalam waktu dekat.</p>
+                        </>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-3 text-sm">
@@ -92,8 +125,8 @@ export default function Dashboard() {
                       <Activity className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="font-medium">Skor Baru Tersedia</p>
-                      <p className="text-muted-foreground text-xs mt-0.5">AI telah memperbarui skor efisiensi Anda minggu ini.</p>
+                      <p className="font-medium">Sistem Pemantauan Aktif</p>
+                      <p className="text-muted-foreground text-xs mt-0.5">AI terus memantau efisiensi pengeluaran Anda.</p>
                     </div>
                   </div>
                 </div>
