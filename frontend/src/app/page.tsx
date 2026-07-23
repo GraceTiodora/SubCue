@@ -19,7 +19,9 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [showNotif, setShowNotif] = useState(false);
   const [username, setUsername] = useState("Pengguna");
+  const [budget, setBudget] = useState(1500000);
   const [upcomingBill, setUpcomingBill] = useState<{name: string, cost: number} | null>(null);
+  const [hasUnreadNotif, setHasUnreadNotif] = useState(true);
   const router = useRouter();
 
   const fetchHealthData = () => {
@@ -75,6 +77,9 @@ export default function Dashboard() {
     const storedName = localStorage.getItem("username");
     if (storedName) setUsername(storedName);
 
+    const storedBudget = localStorage.getItem("budget");
+    if (storedBudget) setBudget(Number(storedBudget));
+
     // Listen to updates from SubscriptionList
     window.addEventListener('subscription-updated', fetchHealthData);
     return () => window.removeEventListener('subscription-updated', fetchHealthData);
@@ -84,18 +89,25 @@ export default function Dashboard() {
     <div className="flex h-screen overflow-hidden">
       {/* Main Content Column */}
       <main className="flex-1 overflow-y-auto bg-background p-8">
-        <header className="flex justify-between items-start mb-8">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4 md:gap-0">
           <div>
-            <p className="text-muted-foreground text-sm mb-1 flex items-center gap-1">
-              Selamat datang kembali, {username}! <span className="text-lg">👋</span>
+            <h1 className="text-3xl font-bold tracking-tight mb-2">Dashboard Utama</h1>
+            <p className="text-muted-foreground text-sm flex items-center gap-1">
+              Selamat datang kembali, <span className="font-medium text-foreground">{username}</span> 👋
             </p>
-            <h1 className="text-3xl font-bold tracking-tight mb-2">Dashboard Kecerdasan Langganan</h1>
-            <p className="text-muted-foreground">Kelola, analisis, dan optimalkan seluruh langganan Anda di satu tempat.</p>
           </div>
           <div className="flex items-center gap-4 relative">
-            <button onClick={() => setShowNotif(!showNotif)} className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:bg-card transition-colors relative">
+            <button 
+              onClick={() => {
+                setShowNotif(!showNotif);
+                setHasUnreadNotif(false);
+              }} 
+              className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:bg-card transition-colors relative"
+            >
               <Bell className="w-4 h-4" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-danger rounded-full"></span>
+              {hasUnreadNotif && (
+                <span className="absolute top-2 right-2 w-2 h-2 bg-danger rounded-full"></span>
+              )}
             </button>
             
             {showNotif && (
@@ -196,19 +208,19 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Anggaran</p>
-                  <p className="text-xl font-bold">Rp1.500.000</p>
+                  <p className="text-xl font-bold">Rp{budget.toLocaleString('id-ID')}</p>
                 </div>
               </div>
               
               <div className="mt-6">
                 <div className="flex justify-between text-xs mb-2">
                   <span className="text-muted-foreground">Penggunaan Anggaran</span>
-                  <span className="text-muted-foreground font-medium">{Math.round(((healthData?.monthly_spending || 0) / 1500000) * 100)}% terpakai</span>
+                  <span className="text-muted-foreground font-medium">{Math.round(((healthData?.monthly_spending || 0) / budget) * 100)}% terpakai</span>
                 </div>
                 <div className="w-full bg-border rounded-full h-2.5 overflow-hidden">
                   <div 
-                    className={`h-2.5 rounded-full transition-all duration-1000 ${(healthData?.monthly_spending || 0) > 1500000 ? 'bg-danger' : (healthData?.monthly_spending || 0) > 1000000 ? 'bg-warning' : 'bg-success'}`}
-                    style={{ width: `${Math.min(((healthData?.monthly_spending || 0) / 1500000) * 100, 100)}%` }}
+                    className={`h-2.5 rounded-full transition-all duration-1000 ${(healthData?.monthly_spending || 0) > budget ? 'bg-danger' : (healthData?.monthly_spending || 0) > budget * 0.75 ? 'bg-warning' : 'bg-success'}`}
+                    style={{ width: `${Math.min(((healthData?.monthly_spending || 0) / budget) * 100, 100)}%` }}
                   ></div>
                 </div>
               </div>

@@ -20,10 +20,7 @@ export default function RootLayout({
         <main className="flex-1 h-screen overflow-y-auto">
           {children}
         </main>
-        {/* Right Sidebar Column for ChatAssistant (Global) */}
-        <aside className="w-96 border-l border-border bg-background flex-shrink-0 flex flex-col h-screen">
-          <ChatAssistant />
-        </aside>
+        <ChatAssistant />
       </body>
     </html>
   );

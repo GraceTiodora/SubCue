@@ -1,18 +1,61 @@
 "use client";
 
-import { User, Wallet, ShieldAlert, Info, Trash2, Edit2 } from "lucide-react";
+import { User, Wallet, ShieldAlert, Info, Trash2, Edit2, Moon, Sun, Palette } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
   const [username, setUsername] = useState("Pengguna");
+  const [budget, setBudget] = useState("1.500.000");
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isEditingBudget, setIsEditingBudget] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     const storedName = localStorage.getItem("username");
     if (storedName) setUsername(storedName);
+
+    const storedBudget = localStorage.getItem("budget");
+    if (storedBudget) setBudget(storedBudget);
+
+    const theme = localStorage.getItem("theme");
+    if (theme === "light") {
+      setIsDarkMode(false);
+    }
   }, []);
+
+  const handleSaveProfile = () => {
+    localStorage.setItem("username", username);
+    setIsEditingProfile(false);
+    // Dispatch event so Sidebar updates
+    window.dispatchEvent(new Event('storage'));
+  };
+
+  const handleSaveBudget = () => {
+    // Hanya simpan angka
+    const numericBudget = budget.replace(/[^0-9]/g, '');
+    if (numericBudget) {
+      const formattedBudget = Number(numericBudget).toLocaleString('id-ID');
+      setBudget(formattedBudget);
+      localStorage.setItem("budget", numericBudget);
+    }
+    setIsEditingBudget(false);
+  };
+
+
+  const toggleTheme = () => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("light-mode");
+      localStorage.setItem("theme", "light");
+      setIsDarkMode(false);
+    } else {
+      document.documentElement.classList.remove("light-mode");
+      localStorage.setItem("theme", "dark");
+      setIsDarkMode(true);
+    }
+  };
 
   const handleResetData = async () => {
     if (!confirm("Peringatan: Seluruh data langganan di aplikasi akan dihapus secara permanen. Lanjutkan?")) return;
@@ -54,8 +97,11 @@ export default function SettingsPage() {
                 <p className="text-sm text-muted-foreground">Informasi akun Anda.</p>
               </div>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 border border-border/50 rounded-lg text-sm font-medium hover:bg-card/50 transition-colors text-primary border-primary/20 bg-primary/5 hover:bg-primary/10">
-              <Edit2 className="w-4 h-4" /> Ubah Profil
+            <button 
+              onClick={() => isEditingProfile ? handleSaveProfile() : setIsEditingProfile(true)}
+              className="flex items-center gap-2 px-4 py-2 border border-border/50 rounded-lg text-sm font-medium transition-colors text-primary border-primary/20 bg-primary/5 hover:bg-primary/10"
+            >
+              <Edit2 className="w-4 h-4" /> {isEditingProfile ? "Simpan Profil" : "Ubah Profil"}
             </button>
           </div>
           
@@ -65,8 +111,9 @@ export default function SettingsPage() {
               <input 
                 type="text" 
                 value={username} 
-                disabled 
-                className="w-full bg-background border border-border/50 rounded-lg px-4 py-3 text-sm text-foreground opacity-90 cursor-not-allowed focus:outline-none"
+                onChange={(e) => setUsername(e.target.value)}
+                disabled={!isEditingProfile} 
+                className={`w-full bg-background border rounded-lg px-4 py-3 text-sm text-foreground focus:outline-none transition-all ${isEditingProfile ? 'border-primary ring-1 ring-primary/20' : 'border-border/50 opacity-90 cursor-not-allowed'}`}
               />
             </div>
             <div>
@@ -93,8 +140,11 @@ export default function SettingsPage() {
                 <p className="text-sm text-muted-foreground">Atur batas anggaran bulanan Anda.</p>
               </div>
             </div>
-            <button className="flex items-center gap-2 px-4 py-2 border border-border/50 rounded-lg text-sm font-medium hover:bg-background transition-colors text-muted-foreground cursor-not-allowed opacity-70">
-              <Edit2 className="w-4 h-4" /> Edit Anggaran
+            <button 
+              onClick={() => isEditingBudget ? handleSaveBudget() : setIsEditingBudget(true)}
+              className="flex items-center gap-2 px-4 py-2 border border-border/50 rounded-lg text-sm font-medium transition-colors text-primary border-primary/20 bg-primary/5 hover:bg-primary/10"
+            >
+              <Edit2 className="w-4 h-4" /> {isEditingBudget ? "Simpan Anggaran" : "Edit Anggaran"}
             </button>
           </div>
           
@@ -102,14 +152,45 @@ export default function SettingsPage() {
             <label className="block text-sm font-medium text-muted-foreground mb-2">Batas Anggaran Bulanan (Rp)</label>
             <input 
               type="text" 
-              value="1.500.000" 
-              disabled 
-              className="w-full bg-background border border-border/50 rounded-lg px-4 py-3 text-sm text-foreground opacity-90 cursor-not-allowed focus:outline-none"
+              value={budget} 
+              onChange={(e) => setBudget(e.target.value)}
+              disabled={!isEditingBudget} 
+              className={`w-full bg-background border rounded-lg px-4 py-3 text-sm text-foreground focus:outline-none transition-all ${isEditingBudget ? 'border-primary ring-1 ring-primary/20' : 'border-border/50 opacity-90 cursor-not-allowed'}`}
             />
           </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Info className="w-4 h-4" />
-            <span>Fitur ubah anggaran dinonaktifkan untuk versi purwarupa.</span>
+        </div>
+
+        {/* Appearance Card */}
+        <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+          <div className="flex justify-between items-start mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <Palette className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Tampilan</h2>
+                <p className="text-sm text-muted-foreground">Sesuaikan tema aplikasi sesuai kenyamanan Anda.</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-between p-4 bg-background border border-border/50 rounded-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+                {isDarkMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+              </div>
+              <div>
+                <p className="font-medium">Mode {isDarkMode ? "Gelap" : "Terang"}</p>
+                <p className="text-xs text-muted-foreground">Tema aplikasi saat ini</p>
+              </div>
+            </div>
+            
+            <button 
+              onClick={toggleTheme}
+              className={`w-12 h-6 rounded-full relative transition-colors ${isDarkMode ? 'bg-primary' : 'bg-border'}`}
+            >
+              <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all shadow-sm ${isDarkMode ? 'right-1' : 'left-1'}`}></div>
+            </button>
           </div>
         </div>
 

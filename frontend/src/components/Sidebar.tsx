@@ -8,7 +8,6 @@ import { LayoutDashboard, CreditCard, BarChart2, Settings, Moon, Sun } from "luc
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [isDarkMode, setIsDarkMode] = useState(true);
   const [username, setUsername] = useState("Pengguna");
 
   useEffect(() => {
@@ -18,31 +17,12 @@ export default function Sidebar() {
       router.push("/login");
       return;
     }
-    // Check initial theme
-    const theme = localStorage.getItem("theme");
-    if (theme === "light") {
-      setIsDarkMode(false);
-      document.documentElement.classList.add("light-mode");
-    }
-
     // Load username
     const storedName = localStorage.getItem("username");
     if (storedName) {
       setUsername(storedName);
     }
   }, []);
-
-  const toggleTheme = () => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("light-mode");
-      localStorage.setItem("theme", "light");
-      setIsDarkMode(false);
-    } else {
-      document.documentElement.classList.remove("light-mode");
-      localStorage.setItem("theme", "dark");
-      setIsDarkMode(true);
-    }
-  };
 
   if (pathname === "/login") return null;
 
@@ -82,21 +62,7 @@ export default function Sidebar() {
       </div>
 
       <div>
-        <div className="p-4 px-8 mb-2">
-          <button 
-            className="w-full flex items-center justify-between"
-            onClick={toggleTheme}
-          >
-            <div className="flex items-center gap-2 text-muted-foreground text-sm">
-              {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-              <span>{isDarkMode ? "Mode Gelap" : "Mode Terang"}</span>
-            </div>
-            <div className={`w-8 h-4 rounded-full relative transition-colors ${isDarkMode ? 'bg-primary' : 'bg-border'}`}>
-              <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 transition-all ${isDarkMode ? 'right-0.5' : 'left-0.5'}`}></div>
-            </div>
-          </button>
-        </div>
-        
+
         <div className="p-4 border-t border-border/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary font-semibold">
@@ -104,7 +70,6 @@ export default function Sidebar() {
             </div>
             <div className="flex-1 overflow-hidden">
               <h4 className="text-sm font-medium truncate">{username}</h4>
-              <p className="text-xs text-muted-foreground">Free Plan</p>
             </div>
           </div>
         </div>

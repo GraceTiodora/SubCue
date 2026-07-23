@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { MessageSquare, X, Send, Bot, LineChart, Clock, CalendarDays } from "lucide-react";
 
 export default function ChatAssistant() {
+  const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [history, setHistory] = useState<{role: 'user'|'ai', content: string}[]>([]);
   const [loading, setLoading] = useState(false);
@@ -59,15 +60,34 @@ export default function ChatAssistant() {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-background relative">
-      <div className="p-6 border-b border-border/50 flex justify-between items-center">
-        <h3 className="font-semibold flex items-center gap-2">
-          <Bot className="w-5 h-5 text-primary" /> SubWise AI
-        </h3>
-        <button className="text-muted-foreground hover:text-foreground hover:bg-card p-1.5 rounded-lg transition-colors">
-          <X className="w-4 h-4" />
+    <>
+      {/* Floating Action Button (Shows when closed) */}
+      {!isOpen && (
+        <button 
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-8 right-8 w-14 h-14 bg-primary text-white rounded-full flex items-center justify-center shadow-2xl hover:bg-indigo-500 hover:scale-105 transition-all z-40"
+        >
+          <Bot className="w-6 h-6" />
         </button>
-      </div>
+      )}
+
+      {/* Slide-in Chat Panel */}
+      <div 
+        className={`fixed top-0 right-0 h-screen w-96 bg-background border-l border-border/50 shadow-2xl flex flex-col z-50 transition-transform duration-300 ease-in-out ${
+          isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        <div className="p-6 border-b border-border/50 flex justify-between items-center bg-card">
+          <h3 className="font-semibold flex items-center gap-2">
+            <Bot className="w-5 h-5 text-primary" /> SubCue AI
+          </h3>
+          <button 
+            onClick={() => setIsOpen(false)}
+            className="text-muted-foreground hover:text-foreground hover:bg-background p-1.5 rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
       <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
         {history.length === 0 ? (
@@ -145,6 +165,15 @@ export default function ChatAssistant() {
           Asisten AI dapat membuat kesalahan.
         </p>
       </div>
-    </div>
+      </div>
+      
+      {/* Overlay for mobile/desktop to close when clicking outside */}
+      {isOpen && (
+        <div 
+          onClick={() => setIsOpen(false)}
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-opacity"
+        ></div>
+      )}
+    </>
   );
 }

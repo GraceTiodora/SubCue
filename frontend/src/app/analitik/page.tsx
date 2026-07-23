@@ -61,29 +61,44 @@ export default function AnalyticsPage() {
       
       let monthlyAmount = 0;
       subs.forEach(sub => {
-        let isActive = true;
-        if (sub.start_date) {
-           const startDate = new Date(sub.start_date);
-           const startY = startDate.getFullYear();
-           const startM = startDate.getMonth();
-           
-           if (startY > y || (startY === y && startM > m)) {
-               isActive = false;
-           }
+        let isBilledThisMonth = false;
+        
+        // Gunakan start_date jika ada, jika tidak anggap mulai bulan ini (currentDate)
+        const referenceDate = sub.start_date ? new Date(sub.start_date) : (sub.next_renewal ? new Date(sub.next_renewal) : currentDate);
+        
+        const refY = referenceDate.getFullYear();
+        const refM = referenceDate.getMonth();
+        const refDay = referenceDate.getDate();
+        const currentDay = currentDate.getDate();
+        
+        // Pastikan langganan sudah aktif di bulan/tahun yang sedang dievaluasi (y, m)
+        if (y > refY || (y === refY && m >= refM)) {
+            // Cek apakah tagihan bulan ini sudah jatuh tempo (jika bulan yang dievaluasi adalah bulan ini)
+            let hasPassedBillingDay = true;
+            if (y === currentYear && m === currentMonth) {
+                // Jika hari ini masih sebelum tanggal tagihan, berarti belum bayar bulan ini (kecuali ini adalah bulan pertama langganan)
+                if (currentDay < refDay && !(y === refY && m === refM)) {
+                    hasPassedBillingDay = false;
+                }
+            }
+            
+            if (hasPassedBillingDay) {
+                if (sub.billing_cycle === 'monthly') {
+                    isBilledThisMonth = true;
+                } else if (sub.billing_cycle === 'yearly') {
+                    // Tahunan HANYA ditagih di bulan yang sama dengan referenceDate
+                    if (m === refM) {
+                        isBilledThisMonth = true;
+                    }
+                }
+            }
         }
         
-        if (isActive) {
-           monthlyAmount += sub.billing_cycle === 'monthly' ? sub.cost : sub.cost / 12;
+        if (isBilledThisMonth) {
+           // Uang keluar secara penuh pada bulan tagihan, tidak dibagi 12
+           monthlyAmount += sub.cost;
         }
       });
-      
-      // Menambahkan sedikit variasi acak (simulasi langganan lama yang sudah dibatalkan) agar grafik tidak terlihat datar/template
-      // Variasi hanya ditambahkan pada bulan-bulan sebelumnya (i > 0)
-      if (i > 0) {
-        // Random variance between -15% to +20%
-        const variance = 1 + (Math.sin(m * 13) * 0.2); 
-        monthlyAmount = Math.round(monthlyAmount * variance);
-      }
 
       result.push({ month: monthsStr[m], amount: monthlyAmount });
     }
