@@ -36,7 +36,7 @@ if GROQ_API_KEY:
         base_url="https://api.groq.com/openai/v1",
         api_key=GROQ_API_KEY,
     )
-    AI_MODEL = "llama3-8b-8192"
+    AI_MODEL = "llama-3.3-70b-versatile" # Model terbaru dari Groq
 else:
     print(f"DEBUG: Using OpenRouter API Key starting with: {OPENROUTER_API_KEY[:10]}...")
     client = OpenAI(

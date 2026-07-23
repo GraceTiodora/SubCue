@@ -207,7 +207,7 @@ export default function AnalyticsPage() {
                   <Tooltip 
                     contentStyle={{ backgroundColor: '#1e212b', borderColor: '#2e3340', borderRadius: '8px', color: '#f8fafc' }}
                     itemStyle={{ color: '#6366f1' }}
-                    formatter={(value: number) => [`Rp ${value.toLocaleString('id-ID')}`, 'Total Pengeluaran']}
+                    formatter={(value: any) => [`Rp ${Number(value).toLocaleString('id-ID')}`, 'Pengeluaran']}
                   />
                   <Line 
                     type="monotone" 
