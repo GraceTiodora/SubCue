@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Plus, Trash2, CalendarDays } from "lucide-react";
+import { useEffect, useState, useRef } from "react";
+import { Plus, Trash2, CalendarDays, Upload, Loader2, Image as ImageIcon } from "lucide-react";
 
 // Helper function to generate GCal URL for H-3
 const getGcalUrl = (name: string, cost: number, next_renewal: string) => {
@@ -9,7 +9,7 @@ const getGcalUrl = (name: string, cost: number, next_renewal: string) => {
   const d = new Date(next_renewal);
   d.setDate(d.getDate() - 3);
   const reminderDateStr = d.toISOString().split('T')[0].replace(/-/g, '');
-  return `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Pengingat+Tagihan+${encodeURIComponent(name)}+%28H-3%29&dates=${reminderDateStr}T090000Z/${reminderDateStr}T100000Z&details=Pengingat+otomatis+SubWise+AI+untuk+tagihan+${encodeURIComponent(name)}+sebesar+Rp${cost.toLocaleString('id-ID')}+pada+tanggal+${next_renewal}`;
+  return `https://calendar.google.com/calendar/u/0/r/eventedit?text=Pengingat+Tagihan+${encodeURIComponent(name)}+%28H-3%29&dates=${reminderDateStr}T090000Z/${reminderDateStr}T100000Z&details=Pengingat+otomatis+SubWise+AI+untuk+tagihan+${encodeURIComponent(name)}+sebesar+Rp${cost.toLocaleString('id-ID')}+pada+tanggal+${next_renewal}`;
 };
 
 interface Subscription {
@@ -37,6 +37,9 @@ export default function SubscriptionList({ readonly = false }: Props) {
     name: "", cost: 0, billing_cycle: "monthly", start_date: "", next_renewal: "", category: "Entertainment", usage_level: "high"
   });
   const [addToCalendar, setAddToCalendar] = useState(true);
+  
+  const [isScanning, setIsScanning] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchSubs = () => {
     setLoading(true);
@@ -104,6 +107,47 @@ export default function SubscriptionList({ readonly = false }: Props) {
       setFormData({name: "", cost: 0, billing_cycle: "monthly", start_date: "", next_renewal: "", category: "Entertainment", usage_level: "high"});
     })
     .catch(err => console.error(err));
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsScanning(true);
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64String = reader.result as string;
+      try {
+        const userId = localStorage.getItem("user_id") || "default";
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/api/scan-receipt`, {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "x-user-id": userId
+          },
+          body: JSON.stringify({ image_base64: base64String })
+        });
+        
+        if (!res.ok) throw new Error("Gagal scan struk");
+        const data = await res.json();
+        
+        setFormData(prev => ({
+          ...prev,
+          name: data.name || prev.name,
+          cost: data.cost || prev.cost,
+          billing_cycle: data.billing_cycle || prev.billing_cycle,
+          start_date: data.start_date || prev.start_date,
+          category: data.category || prev.category
+        }));
+      } catch (err) {
+        console.error(err);
+        alert("Gagal memindai gambar. Pastikan gambar jelas dan api key aktif.");
+      }
+      setIsScanning(false);
+      // Reset input file
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleDelete = (id: number) => {

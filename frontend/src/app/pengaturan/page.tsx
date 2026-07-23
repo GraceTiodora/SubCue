@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function SettingsPage() {
   const [username, setUsername] = useState("Pengguna");
+  const [email, setEmail] = useState("pengguna@example.com");
   const [budget, setBudget] = useState("1.500.000");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingBudget, setIsEditingBudget] = useState(false);
@@ -15,7 +16,16 @@ export default function SettingsPage() {
 
   useEffect(() => {
     const storedName = localStorage.getItem("username");
-    if (storedName) setUsername(storedName);
+    if (storedName) {
+      setUsername(storedName);
+    }
+
+    const storedEmail = localStorage.getItem("email");
+    if (storedEmail) {
+      setEmail(storedEmail);
+    } else if (storedName) {
+      setEmail(`${storedName.toLowerCase().replace(/\s+/g, '')}@example.com`);
+    }
 
     const storedBudget = localStorage.getItem("budget");
     if (storedBudget) setBudget(storedBudget);
@@ -27,7 +37,14 @@ export default function SettingsPage() {
   }, []);
 
   const handleSaveProfile = () => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert("Format email tidak valid! Harap masukkan email yang benar (contoh: nama@email.com).");
+      return;
+    }
+
     localStorage.setItem("username", username);
+    localStorage.setItem("email", email);
     setIsEditingProfile(false);
     // Dispatch event so Sidebar updates
     window.dispatchEvent(new Event('storage'));
@@ -40,6 +57,8 @@ export default function SettingsPage() {
       const formattedBudget = Number(numericBudget).toLocaleString('id-ID');
       setBudget(formattedBudget);
       localStorage.setItem("budget", numericBudget);
+      // Dispatch event so Dashboard updates
+      window.dispatchEvent(new Event('storage'));
     }
     setIsEditingBudget(false);
   };
@@ -120,9 +139,10 @@ export default function SettingsPage() {
               <label className="block text-sm font-medium text-muted-foreground mb-2">Email</label>
               <input 
                 type="text" 
-                value={`${username.toLowerCase().replace(/\s+/g, '')}@example.com`} 
-                disabled 
-                className="w-full bg-background border border-border/50 rounded-lg px-4 py-3 text-sm text-foreground opacity-90 cursor-not-allowed focus:outline-none"
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={!isEditingProfile} 
+                className={`w-full bg-background border rounded-lg px-4 py-3 text-sm text-foreground focus:outline-none transition-all ${isEditingProfile ? 'border-primary ring-1 ring-primary/20' : 'border-border/50 opacity-90 cursor-not-allowed'}`}
               />
             </div>
           </div>

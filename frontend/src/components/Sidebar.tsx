@@ -22,6 +22,14 @@ export default function Sidebar() {
     if (storedName) {
       setUsername(storedName);
     }
+
+    const handleStorageChange = () => {
+      const name = localStorage.getItem("username");
+      if (name) setUsername(name);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
   if (pathname === "/login") return null;

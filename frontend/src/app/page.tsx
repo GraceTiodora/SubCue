@@ -80,9 +80,22 @@ export default function Dashboard() {
     const storedBudget = localStorage.getItem("budget");
     if (storedBudget) setBudget(Number(storedBudget));
 
+    const handleStorageChange = () => {
+      const name = localStorage.getItem("username");
+      if (name) setUsername(name);
+      
+      const budg = localStorage.getItem("budget");
+      if (budg) setBudget(Number(budg));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
     // Listen to updates from SubscriptionList
     window.addEventListener('subscription-updated', fetchHealthData);
-    return () => window.removeEventListener('subscription-updated', fetchHealthData);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('subscription-updated', fetchHealthData);
+    };
   }, []);
 
   return (
