@@ -1,51 +1,100 @@
 "use client";
 
-import { Settings2, Shield, User } from "lucide-react";
+import { User, Wallet, ShieldAlert, Info, Trash2, Edit2 } from "lucide-react";
 
 export default function SettingsPage() {
   return (
-    <div className="p-8">
-      <header className="mb-8">
+    <div className="p-8 pb-20 max-w-4xl">
+      <header className="mb-10">
         <h1 className="text-3xl font-bold tracking-tight mb-2">Pengaturan</h1>
         <p className="text-muted-foreground">Sesuaikan preferensi akun dan batas anggaran Anda.</p>
       </header>
 
-      <div className="max-w-2xl space-y-6">
-        <div className="glass-panel p-6">
-          <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
-            <User className="w-5 h-5 text-primary" /> Profil
-          </h2>
-          <div className="space-y-4">
+      <div className="space-y-6">
+        {/* Profile Card */}
+        <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+          <div className="flex justify-between items-start mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <User className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Profil</h2>
+                <p className="text-sm text-muted-foreground">Informasi akun Anda.</p>
+              </div>
+            </div>
+            <button className="flex items-center gap-2 px-4 py-2 border border-border/50 rounded-lg text-sm font-medium hover:bg-card/50 transition-colors text-primary border-primary/20 bg-primary/5 hover:bg-primary/10">
+              <Edit2 className="w-4 h-4" /> Ubah Profil
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm text-muted-foreground mb-1">Nama Tampilan</label>
-              <input type="text" className="w-full bg-background border border-border rounded-md px-3 py-2 text-sm" defaultValue="Grace" disabled />
+              <label className="block text-sm font-medium text-muted-foreground mb-2">Nama Tampilan</label>
+              <input 
+                type="text" 
+                value="Grace" 
+                disabled 
+                className="w-full bg-background border border-border/50 rounded-lg px-4 py-3 text-sm text-foreground opacity-90 cursor-not-allowed focus:outline-none"
+              />
             </div>
             <div>
-              <label className="block text-sm text-muted-foreground mb-1">Email</label>
-              <input type="email" className="w-full bg-background border border-border rounded-md px-3 py-2 text-sm" defaultValue="grace@example.com" disabled />
+              <label className="block text-sm font-medium text-muted-foreground mb-2">Email</label>
+              <input 
+                type="text" 
+                value="grace@example.com" 
+                disabled 
+                className="w-full bg-background border border-border/50 rounded-lg px-4 py-3 text-sm text-foreground opacity-90 cursor-not-allowed focus:outline-none"
+              />
             </div>
           </div>
         </div>
 
-        <div className="glass-panel p-6">
-          <h2 className="text-lg font-medium mb-4 flex items-center gap-2">
-            <Settings2 className="w-5 h-5 text-primary" /> Preferensi Keuangan
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm text-muted-foreground mb-1">Batas Anggaran Bulanan (Rp)</label>
-              <input type="text" className="w-full bg-background border border-border rounded-md px-3 py-2 text-sm" defaultValue="1.500.000" disabled />
-              <p className="text-xs text-muted-foreground mt-1">*Fitur ubah anggaran dinonaktifkan untuk versi purwarupa.</p>
+        {/* Budget Preference Card */}
+        <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-sm">
+          <div className="flex justify-between items-start mb-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                <Wallet className="w-6 h-6" />
+              </div>
+              <div>
+                <h2 className="text-lg font-semibold">Preferensi Keuangan</h2>
+                <p className="text-sm text-muted-foreground">Atur batas anggaran bulanan Anda.</p>
+              </div>
             </div>
+            <button className="flex items-center gap-2 px-4 py-2 border border-border/50 rounded-lg text-sm font-medium hover:bg-background transition-colors text-muted-foreground cursor-not-allowed opacity-70">
+              <Edit2 className="w-4 h-4" /> Edit Anggaran
+            </button>
+          </div>
+          
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-muted-foreground mb-2">Batas Anggaran Bulanan (Rp)</label>
+            <input 
+              type="text" 
+              value="1.500.000" 
+              disabled 
+              className="w-full bg-background border border-border/50 rounded-lg px-4 py-3 text-sm text-foreground opacity-90 cursor-not-allowed focus:outline-none"
+            />
+          </div>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Info className="w-4 h-4" />
+            <span>Fitur ubah anggaran dinonaktifkan untuk versi purwarupa.</span>
           </div>
         </div>
 
-        <div className="glass-panel p-6">
-          <h2 className="text-lg font-medium mb-4 flex items-center gap-2 text-danger">
-            <Shield className="w-5 h-5" /> Zona Berbahaya
-          </h2>
-          <button className="bg-danger/10 text-danger border border-danger/20 hover:bg-danger hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-            Hapus Semua Data
+        {/* Danger Zone */}
+        <div className="bg-[#1a1114] border border-danger/20 rounded-2xl p-6 shadow-sm">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center text-danger">
+              <ShieldAlert className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-danger">Zona Berbahaya</h2>
+              <p className="text-sm text-muted-foreground">Tindakan ini tidak dapat dibatalkan.</p>
+            </div>
+          </div>
+          <button className="flex items-center gap-2 px-5 py-2.5 border border-danger/30 rounded-lg text-sm font-medium text-danger hover:bg-danger/10 transition-colors">
+            <Trash2 className="w-4 h-4" /> Hapus Semua Data
           </button>
         </div>
       </div>

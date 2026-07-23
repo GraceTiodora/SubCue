@@ -7,11 +7,11 @@
 **Never pay for forgotten subscriptions again.**  
 **Smarter subscriptions. Healthier spending.**
 
----
+--- 
 
-![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688)
-![OpenRouter](https://img.shields.io/badge/OpenRouter-LLM-blue)
+![Groq](https://img.shields.io/badge/Groq-Llama3-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 **[Live Demo on Vercel](#) | [Public GitHub Repository](#)** *(URLs pending deployment)*
@@ -39,11 +39,13 @@ Most reminder applications only notify users before renewal. They do **not** hel
 **SubCue AI** combines intelligent reminders with AI-powered spending analysis. Instead of simply reminding users about upcoming renewals, SubCue AI evaluates subscription health and provides personalized recommendations to optimize recurring expenses.
 
 ### Core Features
-* **Smart Renewal Reminder:** Get notified before billing.
-* **Subscription Dashboard:** Monitor spending, projection, and renewals.
-* **AI Spending Analysis & Health Score:** AI calculates the health of your digital spending.
-* **Personalized Recommendations:** AI recommends downgrading, cancelling, or keeping services.
-* **AI Chat Assistant:** Ask natural language questions about your budget.
+* **Smart Renewal Reminder:** Auto-sync your upcoming bills directly to **Google Calendar** (H-3 Reminders).
+* **Enterprise Dashboard:** Monitor active subscriptions with a sleek 3-column layout.
+* **Advanced Analytics:** Interactive charts (using Recharts) mapping your historical and projected spending with dynamic time frames (3m, 6m, 1y).
+* **AI Efficiency Score:** Powered by **Groq & Llama-3**, AI calculates the health of your digital spending instantly.
+* **Personalized AI Recommendations:** Actionable advice on downgrading, cancelling, or keeping services in native Indonesian.
+* **AI Chat Assistant:** Ask natural language questions about your budget directly in the dashboard.
+* **Theme Support:** Polished Dark and Light mode toggling at the root level.
 
 ---
 
@@ -57,10 +59,11 @@ We built SubCue AI using a microservices-oriented approach, splitting the Fronte
 
 **Backend (Microservice): FastAPI + Python + SQLite**
 * Deployed on Railway / Render.
-* Handles AI logic (integrating with OpenRouter/Qwen 3), data processing, and subscription calculations.
+* Handles AI logic (integrating with **Groq API / Llama-3** for ultra-low latency responses).
+* Fallback support to OpenRouter.
 
 **Why this architecture?**
-Separating the backend allows us to easily scale the AI processing engine and utilize Python's robust AI/ML ecosystem, while Next.js handles a blazing-fast React frontend.
+Separating the backend allows us to easily scale the AI processing engine, utilize Python's robust AI/ML ecosystem, and leverage Groq's lightning-fast inference, while Next.js handles a blazing-fast React frontend.
 
 ---
 
@@ -104,23 +107,26 @@ npm run dev
 ## 5. Security & Challenge Handling
 
 **How we prevent Leaked API Keys (Security Challenge)**
-During the hackathon, a common challenge is accidentally pushing API keys (like OpenRouter keys) to GitHub. To prevent this, we implemented:
+During the hackathon, a common challenge is accidentally pushing API keys (like Groq/OpenRouter keys) to GitHub. To prevent this, we implemented:
 1. **Environment Variables:** All sensitive keys are stored in `.env` files.
 2. **.gitignore strictness:** Ensured `.env`, `.env.local`, and any SQLite `.db` files are in `.gitignore` from the very first commit.
 3. **Environment Templates:** Provided `.env.example` files containing only dummy keys for safe sharing.
-4. **Vercel/Railway Secrets:** Real keys are only injected directly into the deployment platforms' environment variables settings.
+4. **Platform Secrets:** Real keys are only injected directly into the deployment platforms' environment variables settings.
 
 ---
 
 ## 6. Working Demo (MVP Scope)
 
-What is functional right now in the demo:
+What is 100% functional right now in the demo:
 
-Manual subscription input via the UI  
-Financial Dashboard showing total spending  
-AI-powered **Subscription Health Score** calculation  
-Personalized AI Recommendations based on dummy/inputted user data  
-AI Chat Assistant for queries  
+- [x] **Subscription Management:** Full CRUD operations via interactive Modal overlay.
+- [x] **Financial Dashboard:** Real-time metrics with dynamic budget calculations.
+- [x] **Google Calendar Integration:** 1-click automatic event generation for H-3 bill reminders.
+- [x] **Advanced Analytics UI:** Responsive line charts rendering projection trends.
+- [x] **AI Efficiency Score:** Instant Llama-3 powered spending health assessments.
+- [x] **Actionable AI Recommendations:** Context-aware cancellation advice.
+- [x] **AI Chat Assistant:** Context-injected chatbot capable of answering questions about user's active subscriptions.
+- [x] **Theming:** Full Dark/Light mode support via CSS variables.
 
 ---
 

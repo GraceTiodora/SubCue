@@ -1,11 +1,34 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, CreditCard, BarChart2, Settings, Moon } from "lucide-react";
+import { LayoutDashboard, CreditCard, BarChart2, Settings, Moon, Sun } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  useEffect(() => {
+    // Check local storage for theme preference
+    const theme = localStorage.getItem("theme");
+    if (theme === "light") {
+      setIsDarkMode(false);
+      document.documentElement.classList.add("light-mode");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("light-mode");
+      localStorage.setItem("theme", "light");
+      setIsDarkMode(false);
+    } else {
+      document.documentElement.classList.remove("light-mode");
+      localStorage.setItem("theme", "dark");
+      setIsDarkMode(true);
+    }
+  };
 
   const navItems = [
     { name: "Dashboard", href: "/", icon: <LayoutDashboard className="w-4 h-4" /> },
@@ -47,14 +70,27 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="p-4 mt-auto border-t border-border/50 pt-6">
-        <div className="flex items-center justify-between px-2">
+      <div className="mt-auto border-t border-border/50">
+        <div 
+          className="p-4 flex items-center justify-between border-t border-border/50 cursor-pointer hover:bg-card/50 transition-colors" 
+          onClick={toggleTheme}
+        >
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <Moon className="w-4 h-4" />
-            <span>Mode Gelap</span>
+            {isDarkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+            <span>{isDarkMode ? "Mode Gelap" : "Mode Terang"}</span>
           </div>
-          <div className="w-8 h-4 bg-primary rounded-full relative">
-            <div className="w-3 h-3 bg-white rounded-full absolute right-0.5 top-0.5"></div>
+          <div className={`w-8 h-4 rounded-full relative transition-colors ${isDarkMode ? 'bg-primary' : 'bg-border'}`}>
+            <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 transition-all ${isDarkMode ? 'right-0.5' : 'left-0.5'}`}></div>
+          </div>
+        </div>
+        
+        <div className="p-4 border-t border-border/50 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-card flex items-center justify-center font-bold text-sm border border-border">
+            G
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-foreground">Grace</p>
+            <p className="text-xs text-muted-foreground">Free Plan</p>
           </div>
         </div>
       </div>

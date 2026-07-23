@@ -11,6 +11,7 @@ class SubscriptionDB(Base):
     name = Column(String, index=True)
     cost = Column(Float)
     billing_cycle = Column(String) # "monthly" or "yearly"
+    start_date = Column(String) # ISO format string
     next_renewal = Column(String) # ISO format string for simplicity in MVP
     category = Column(String)
     usage_level = Column(String) # "high", "medium", "low"
@@ -20,6 +21,7 @@ class SubscriptionBase(BaseModel):
     name: str
     cost: float
     billing_cycle: str
+    start_date: Optional[str] = None
     next_renewal: str
     category: str
     usage_level: str

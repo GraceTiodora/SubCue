@@ -16,10 +16,11 @@ interface SubData {
 export default function Dashboard() {
   const [healthData, setHealthData] = useState<SubData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showNotif, setShowNotif] = useState(false);
 
   const fetchHealthData = () => {
     setLoading(true);
-    fetch("http://127.0.0.1:8000/api/health-score")
+    fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000"}/api/health-score`)
       .then(res => res.json())
       .then(data => {
         setHealthData(data);
@@ -58,10 +59,38 @@ export default function Dashboard() {
             <h1 className="text-3xl font-bold tracking-tight mb-2">Dashboard Kecerdasan Langganan</h1>
             <p className="text-muted-foreground">Kelola, analisis, dan optimalkan seluruh langganan Anda di satu tempat.</p>
           </div>
-          <div className="flex items-center gap-4">
-            <button className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:bg-card transition-colors">
+          <div className="flex items-center gap-4 relative">
+            <button onClick={() => setShowNotif(!showNotif)} className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-muted-foreground hover:bg-card transition-colors relative">
               <Bell className="w-4 h-4" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-danger rounded-full"></span>
             </button>
+            
+            {showNotif && (
+              <div className="absolute top-12 right-12 w-72 bg-card border border-border/50 rounded-xl shadow-lg p-4 z-50">
+                <h4 className="font-semibold text-sm mb-3">Notifikasi</h4>
+                <div className="space-y-3">
+                  <div className="flex gap-3 text-sm border-b border-border/50 pb-3">
+                    <div className="w-8 h-8 rounded-full bg-warning/10 text-warning flex items-center justify-center shrink-0">
+                      <Bell className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Tagihan Hampir Tiba</p>
+                      <p className="text-muted-foreground text-xs mt-0.5">Netflix (Rp 30.000) akan ditagih dalam waktu dekat.</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 text-sm">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <Activity className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Skor Baru Tersedia</p>
+                      <p className="text-muted-foreground text-xs mt-0.5">AI telah memperbarui skor efisiensi Anda minggu ini.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="w-10 h-10 rounded-full bg-border flex items-center justify-center font-bold text-sm cursor-pointer">
               G
             </div>
@@ -81,7 +110,7 @@ export default function Dashboard() {
             <div className="glass-panel p-6 flex flex-col">
               <h2 className="text-lg font-medium mb-6 flex items-center gap-2">
                 <Activity className="w-5 h-5 text-primary" />
-                Kesehatan Langganan
+                Skor Efisiensi
               </h2>
               
               <div className="flex items-end gap-6 mb-8">

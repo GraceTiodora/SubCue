@@ -1,5 +1,6 @@
 import os
 import json
+import re
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -27,13 +28,22 @@ app.add_middleware(
 )
 
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "dummy_key")
-print(f"DEBUG: Using API Key starting with: {OPENROUTER_API_KEY[:10]}...")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
-# Create OpenAI client for OpenRouter
-client = OpenAI(
-  base_url="https://openrouter.ai/api/v1",
-  api_key=OPENROUTER_API_KEY,
-)
+if GROQ_API_KEY:
+    print(f"DEBUG: Using GROQ API Key starting with: {GROQ_API_KEY[:10]}...")
+    client = OpenAI(
+        base_url="https://api.groq.com/openai/v1",
+        api_key=GROQ_API_KEY,
+    )
+    AI_MODEL = "llama3-8b-8192"
+else:
+    print(f"DEBUG: Using OpenRouter API Key starting with: {OPENROUTER_API_KEY[:10]}...")
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=OPENROUTER_API_KEY,
+    )
+    AI_MODEL = "openrouter/free"
 
 @app.get("/")
 def read_root():
@@ -98,16 +108,17 @@ def get_health_score(db: Session = Depends(get_db)):
     
     try:
         completion = client.chat.completions.create(
-            model="openrouter/free",
+            model=AI_MODEL,
+            response_format={"type": "json_object"}, # Memaksa output JSON untuk Groq/OpenAI
             messages=[{"role": "user", "content": prompt}]
         )
         
         result_text = completion.choices[0].message.content.strip()
-        # Clean up in case it returns markdown backticks
-        if result_text.startswith("```json"):
-            result_text = result_text[7:-3]
-        elif result_text.startswith("```"):
-            result_text = result_text[3:-3]
+        
+        # Ekstrak JSON menggunakan regex untuk berjaga-jaga jika AI memberi teks tambahan
+        json_match = re.search(r'\{.*\}', result_text, re.DOTALL)
+        if json_match:
+            result_text = json_match.group(0)
             
         data = json.loads(result_text)
         data["monthly_spending"] = total_monthly
@@ -117,10 +128,10 @@ def get_health_score(db: Session = Depends(get_db)):
         print("AI Error:", str(e))
         return {
             "score": 50,
-            "status": "AI Offline",
+            "status": "AI Sibuk/Limit",
             "monthly_spending": total_monthly,
             "potential_saving": 0,
-            "recommendations": ["Tidak dapat menghasilkan rekomendasi saat ini."]
+            "recommendations": ["Server AI (Groq/OpenRouter) sedang membatasi permintaan (*Rate Limit*) atau memproduksi output yang salah. Silakan coba beberapa saat lagi."]
         }
 
 @app.post("/api/chat")
@@ -135,7 +146,7 @@ def chat_with_ai(query: dict, db: Session = Depends(get_db)):
     
     try:
         completion = client.chat.completions.create(
-            model="openrouter/free",
+            model=AI_MODEL,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_message}
