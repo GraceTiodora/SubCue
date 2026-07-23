@@ -14,7 +14,7 @@
 ![Groq](https://img.shields.io/badge/Groq-Llama3-orange)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-**[Live Demo (Netlify)](#) | [Public GitHub Repository](https://github.com/GraceTiodora/SubCue)**
+**[Live Demo (Netlify)](https://6a61e5eb75f3840007cdad3f--subcue.netlify.app) | [Public GitHub Repository](https://github.com/GraceTiodora/SubCue)**
 
 </div>
 
